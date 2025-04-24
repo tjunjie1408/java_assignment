@@ -3,132 +3,97 @@ package CarPackage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CarInventory {
-    private List<Car> cars;
     private final FileHandling fileHandler;
+    private final List<Car> cars;
 
-    public CarInventory(String filePath) {
-        this.fileHandler = new FileHandling(filePath);
-        try {
-            this.cars = fileHandler.loadCarsFile();
-        } catch (IOException e) {
-            System.err.println("Failed to load cars: " + e.getMessage());
-            this.cars = new ArrayList<>();
-        }
+    public CarInventory(FileHandling fileHandler) throws IOException {
+        this.fileHandler = Objects.requireNonNull(fileHandler);
+        this.cars = new ArrayList<>(fileHandler.loadCarsFile());
     }
 
-    private boolean isValidCar(Car car) {
-        return car != null &&
-                car.getId() != null && !car.getId().isEmpty() &&
-                car.getYear() >= 1900 && car.getYear() <= 2100 &&
-                car.getPrice() > 0;
+    private boolean isValid(Car car) {
+        return car != null
+                && car.getId() != null && !car.getId().isEmpty()
+                && car.getYear() >= 1900 && car.getYear() <= 2100
+                && car.getPrice() > 0;
     }
 
     public boolean addCar(Car car) {
-        if(!isValidCar(car)) return false;
-        for (Car existingCar : cars) {
-            if (existingCar.getId().equals(car.getId())) {
-                return false;
-            }
-        }
-        return cars.add(car);
+        if (!isValid(car)) return false;
+        if (cars.stream().anyMatch(c -> c.getId().equals(car.getId()))) return false;
+        cars.add(car);
+        return true;
     }
 
-    public boolean deleteCar(String id){
+    public boolean deleteCar(String id) {
+        return cars.removeIf(c -> c.getId().equals(id));
+    }
+
+    public boolean updateCar(Car updated) {
+        if (!isValid(updated)) return false;
         for (int i = 0; i < cars.size(); i++) {
-            if(cars.get(i).getId().equals(id)){
-                cars.remove(i);
+            if (cars.get(i).getId().equals(updated.getId())) {
+                cars.set(i, updated);
                 return true;
             }
         }
         return false;
     }
 
-    public boolean updateCar(Car updatedCar) {
-        if(updatedCar == null || !isValidCar(updatedCar)) return false;
-        for (int i = 0; i < cars.size(); i++) {
-            if (cars.get(i).getId().equals(updatedCar.getId())) {
-                cars.set(i, updatedCar);
-                return true;
-            }
-        }
-        return false;
+    public Car searchCar(String id) {
+        return cars.stream()
+                .filter(c -> c.getId().equals(id))
+                .findFirst().orElse(null);
     }
 
-    public Car searchCar(String id){
-        for (Car car : cars) {
-            if(car.getId().equals(id)){
-                return car;
-            }
-        }
-        return null;
-    }
-
-    public List<Car> getAllCars(){
+    public List<Car> getAllCars() {
         return new ArrayList<>(cars);
     }
 
-    public List<Car> searchCarsByMake(String make){
-        List<Car> results = new ArrayList<>();
-        for (Car car : cars) {
-            if(car.getMake().toLowerCase().contains(make.toLowerCase())){
-                results.add(car);
-            }
-        }
-        return results;
-    }
-
-    public List<Car> searchCarsByModel(String model){
-        List<Car> results = new ArrayList<>();
-        for (Car car : cars) {
-            if(car.getModel().toLowerCase().contains(model.toLowerCase())){
-                results.add(car);
-            }
-        }
-        return results;
-    }
-
-    public List<Car> searchCarsByPriceRange(double minPrice, double maxPrice){
-        List<Car> results = new ArrayList<>();
-        for (Car car : cars){
-            double price = car.getPrice();
-            if (price >= minPrice && price <= maxPrice) {
-                results.add(car);
-            }
-        }
-        return results;
-    }
-
-    public List<Car> searchCarsByStatus(String status){
-        List<Car> results = new ArrayList<>();
-        for(Car car : cars){
-            if(car.getStatus().equalsIgnoreCase(status)){
-                results.add(car);
-            }
-        }
-        return results;
-    }
-
-    public List<Car> searchCarsByYear(int year){
-        List<Car> results = new ArrayList<>();
-        for(Car car : cars){
-            if(car.getYear() == year){
-                results.add(car);
-            }
-        }
-        return results;
-    }
-
-    public void clearInventory(){
-        cars.clear();
-    }
-
-    public void setCars(List<Car> cars){
-        this.cars = new ArrayList<>(cars);
-    }
-
-    public int getInventorySize(){
+    public int size() {
         return cars.size();
+    }
+
+    public FileHandling getFileHandler() {
+        return fileHandler;
+    }
+
+    public void setCars(List<Car> newCars) {
+        this.cars.clear();
+        this.cars.addAll(newCars);
+    }
+
+    public List<Car> searchCarsByMake(String make) {
+        return cars.stream()
+                .filter(c -> c.getMake().equalsIgnoreCase(make))
+                .collect(Collectors.toList());
+    }
+
+    public List<Car> searchCarsByModel(String model) {
+        return cars.stream()
+                .filter(c -> c.getModel().equalsIgnoreCase(model))
+                .collect(Collectors.toList());
+    }
+
+    public List<Car> searchCarsByPriceRange(double min, double max) {
+        return cars.stream()
+                .filter(c -> c.getPrice() >= min && c.getPrice() <= max)
+                .collect(Collectors.toList());
+    }
+
+    public List<Car> searchCarsByStatus(String status) {
+        return cars.stream()
+                .filter(c -> c.getStatus().equalsIgnoreCase(status))
+                .collect(Collectors.toList());
+    }
+
+    public List<Car> searchCarsByYear(int year) {
+        return cars.stream()
+                .filter(c -> c.getYear() == year)
+                .collect(Collectors.toList());
     }
 }

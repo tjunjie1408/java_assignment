@@ -1,97 +1,81 @@
 package CarPackage;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileHandling {
-    private String filePath;
+    private static final Logger logger = Logger.getLogger(FileHandling.class.getName());
+    private static final String HEADER = "# ID,Make,Model,Year,Price,Color,Status";
+    private Path filePath;
 
-    public FileHandling(String filePath) {
-        this.filePath = filePath;
+    public FileHandling(String path) {
+        this.filePath = Paths.get(path);
     }
 
-    public boolean saveCarsToFile(List<Car> cars){
-        try(BufferedWriter w = new BufferedWriter(new FileWriter(filePath))){
-            w.write("# Car Inventory Data Format: ID,Make,Model,Year,Price,Colour,Status");
-            w.newLine();
-
-            for (Car car : cars) {
-                w.write(car.toFileString());
-                w.newLine();
+    public List<Car> loadCarsFile() {
+        try {
+            if (Files.notExists(filePath)) {
+                Files.createFile(filePath);
+                Files.write(filePath, List.of(HEADER), StandardCharsets.UTF_8);
             }
+            return Files.lines(filePath, StandardCharsets.UTF_8)
+                    .filter(l -> !l.isBlank() && !l.startsWith("#"))
+                    .map(Car::fromFileString)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Failed to load car data", e);
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void saveCarsToFile(List<Car> cars) {
+        Path tmp = filePath.resolveSibling(filePath.getFileName() + ".tmp");
+        try {
+            try (var writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
+                writer.write(HEADER);
+                writer.newLine();
+                for (Car car : cars) {
+                    writer.write(car.toFileString());
+                    writer.newLine();
+                }
+            }
+            Files.move(tmp, filePath,
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Failure to save car data", e);
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public boolean createBackup() {
+        Path backup = filePath.resolveSibling(filePath.getFileName() + ".bak");
+        try {
+            Files.copy(filePath, backup, StandardCopyOption.REPLACE_EXISTING);
             return true;
-        } catch(IOException e){
-            System.err.println("Error saving cars to file: " + e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Backup file failure", e);
             return false;
         }
     }
 
-    public List<Car> loadCarsFile() throws IOException{
-        List<Car> cars = new ArrayList<>();
-        File file = new File(filePath);
-
-        if (!file.exists()) {
-            try{
-                file.createNewFile();
-                try(BufferedWriter w = new BufferedWriter(new FileWriter(filePath))){
-                    w.write("# Car Inventory Data Format: ID,Make,Model,Year,Price,Colour,Status");
-                    w.newLine();
-                }
-            } catch(IOException e){
-                System.err.println("Error creating new file: " + e.getMessage());
-            }
-            return cars;
-        }
-        try(BufferedReader r = new BufferedReader(new FileReader(filePath))){
-            String line;
-            boolean firstLine = true;
-
-            while((line = r.readLine()) != null){
-                if(firstLine || line.trim().isEmpty() || line.startsWith("#")){
-                    firstLine = false;
-                    continue;
-                }
-
-                Car car = Car.fromFileString(line);
-                if(car != null){
-                    cars.add(car);
-                }
-            }
-        }catch(IOException e){
-            System.err.println("Error loading cars from file: " + e.getMessage());
-        }
-        return cars;
-    }
-    public boolean fileExists(){
-        File file = new File(filePath);
-        return file.exists();
+    public String getFilePath() {
+        return filePath.toString();
     }
 
-    public boolean createBackup(){
-        if(!fileExists()){
-            return false;
-        }
-        String backupFilePath = filePath + ".bak";
-        try(BufferedReader r = new BufferedReader(new FileReader(filePath));
-            BufferedWriter w = new BufferedWriter(new FileWriter(backupFilePath))){
-                String line;
-                while((line = r.readLine()) != null){
-                    w.write(line);
-                    w.newLine();
-                }
-                return true;
-            }catch(IOException e){
-                System.err.println("Error creating backup: " + e.getMessage());
-                return false;
-            }
-    }
 
-    public void setFilePath(String filePath){
-        this.filePath = filePath;
-    }
-
-    public String getFilePath(){
-        return filePath;
+    public void setFilePath(String filePath) {
+        this.filePath = Path.of(filePath);
     }
 }
+

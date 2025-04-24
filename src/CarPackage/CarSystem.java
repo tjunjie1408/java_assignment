@@ -1,37 +1,47 @@
 package CarPackage;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CarSystem {
+    private static final Logger logger = Logger.getLogger(CarSystem.class.getName());
     private final CarInventory inventory;
-    private final FileHandling dataIO;
 
     public CarSystem(String dataFilePath) throws IOException {
-        this.inventory = new CarInventory();
-        this.dataIO = new FileHandling(dataFilePath);
-        loadInventoryData();
-    }
-
-    private void loadInventoryData() throws IOException {
-        List<Car> loadedCars = dataIO.loadCarsFile();
-        inventory.setCars(loadedCars);
+        FileHandling fileHandling = new FileHandling(dataFilePath);
+        this.inventory = new CarInventory(fileHandling);
+        logger.info(String.format("System started, %d vehicle records loaded", inventory.size()));
     }
 
     public boolean saveInventoryData() {
-        return dataIO.saveCarsToFile(inventory.getAllCars());
+        try {
+            inventory.getFileHandler().saveCarsToFile(inventory.getAllCars());
+            return true;
+        } catch (UncheckedIOException e) {
+            logger.log(Level.SEVERE, "Failure to save inventory data", e);
+            return false;
+        }
     }
 
     public boolean createDataBackup() {
-        return dataIO.createBackup();
+        boolean ok = inventory.getFileHandler().createBackup();
+        if (!ok) {
+            logger.warning("Failed to create data backup");
+        }
+        return ok;
     }
 
     public boolean addCar(Car car) {
-        boolean result = inventory.addCar(car);
-        if (result) {
-            saveInventoryData();
+        if (inventory.addCar(car)) {
+            logger.info("Vehicle added successfully: ID=" + car.getId());
+            return saveInventoryData();
+        } else {
+            logger.warning("Failed to add vehicle (invalid or duplicate) ID=" + car.getId());
+            return false;
         }
-        return result;
     }
 
     public boolean addCar(String id, String make, String model, int year, double price, String color, String status) {
@@ -40,11 +50,13 @@ public class CarSystem {
     }
 
     public boolean deleteCar(String id) {
-        boolean result = inventory.deleteCar(id);
-        if (result) {
-            saveInventoryData();
+        if (inventory.deleteCar(id)) {
+            logger.info("Delete Vehicle Successfully: ID=" + id);
+            return saveInventoryData();
+        } else {
+            logger.warning("Failed to delete vehicle (not found) ID=" + id);
+            return false;
         }
-        return result;
     }
 
     public Car findCarById(String id) {
@@ -52,11 +64,13 @@ public class CarSystem {
     }
 
     public boolean updateCar(Car car) {
-        boolean result = inventory.updateCar(car);
-        if (result) {
-            saveInventoryData();
+        if (inventory.updateCar(car)) {
+            logger.info("Vehicle updated successfully. ID=" + car.getId());
+            return saveInventoryData();
+        } else {
+            logger.warning("Failed to update vehicle (invalid or not found) ID=" + car.getId());
+            return false;
         }
-        return result;
     }
 
     public List<Car> getAllCars() {
@@ -84,14 +98,14 @@ public class CarSystem {
     }
 
     public int getInventorySize() {
-        return inventory.getInventorySize();
+        return inventory.size();
     }
 
     public void changeDataFilePath(String newPath) {
-        dataIO.setFilePath(newPath);
+        inventory.getFileHandler().setFilePath(newPath);
     }
 
     public String getDataFilePath() {
-        return dataIO.getFilePath();
+        return inventory.getFileHandler().getFilePath();
     }
 }
