@@ -101,7 +101,7 @@ public class CustomerPage2 implements ActionListener {
         }else if(e.getSource() == feedback){
                 int number = DataIO.allfeedback.size()+10001;
                 Object[] options = {"1", "2", "3", "4", "5"};
-                int rating = JOptionPane.showOptionDialog(
+                Integer rating = JOptionPane.showOptionDialog(
                         null,
                         "Please rate the service",
                         "Rating",
@@ -138,14 +138,16 @@ public class CustomerPage2 implements ActionListener {
         x.setSize(600,500);
         x.setLocationRelativeTo(null);
 
-        JLabel welcomeLabel = new JLabel("Welcome " +username+" ! " +
-                "Here is user features page! " +
+        JTextArea welcomeLabel = new JTextArea("Welcome " + username + "!\n" +
+                "Here is the user features page!\n" +
                 "Please choose the option below:");
-        welcomeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        welcomeLabel.setBackground(null);
+        welcomeLabel.setFocusable(false);
+        welcomeLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 18));
 
         profile = new Button("User Profile");
         car_detail = new Button("Car Details");
-        car_request = new Button("Car Booking");
+        car_request = new Button("Booking Request");
         feedback = new Button("Rating and Feedback");
         history = new Button("Purchase History");
         exit = new Button("Exit");
@@ -160,19 +162,19 @@ public class CustomerPage2 implements ActionListener {
         x.setLayout(new BoxLayout(x.getContentPane(), BoxLayout.Y_AXIS));
         x.add(welcomeLabel);
 
-        x.add(createButtonBox(profile, 200, 50));
-        x.add(createButtonBox(car_detail, 200, 50));
-        x.add(createButtonBox(car_request, 200, 50));
-        x.add(createButtonBox(feedback, 200, 50));
-        x.add(createButtonBox(history, 200, 50));
-        x.add(createButtonBox(exit, 200, 50));
+        x.add(createButtonBox(profile));
+        x.add(createButtonBox(car_detail));
+        x.add(createButtonBox(car_request));
+        x.add(createButtonBox(feedback));
+        x.add(createButtonBox(history));
+        x.add(createButtonBox(exit));
 
     }
 
-    private JPanel createButtonBox(Button button, int width, int height) {
+    private JPanel createButtonBox(Button button) {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        button.setPreferredSize(new Dimension(width, height));
+        button.setPreferredSize(new Dimension(200, 50));
         panel.add(button);
         return panel;
     }

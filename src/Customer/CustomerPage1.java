@@ -17,9 +17,19 @@ public class CustomerPage1 implements ActionListener {
             String name = JOptionPane.showInputDialog("Enter your name:");
             if(DataIO.searchName(name) != null){
                 throw new Exception();
+            }else if (name == null) {
+                return;
+            }else if(name.trim().isEmpty()){
+                throw new Exception();
             }
             int password = Integer.parseInt(JOptionPane.showInputDialog("Enter your password:"));
+            if(String.valueOf(password).trim().isEmpty()){
+                throw new Exception();
+            }
             int phone_number = Integer.parseInt(JOptionPane.showInputDialog("Enter your phone number:"));
+            if(String.valueOf(phone_number).trim().isEmpty()){
+                throw new Exception();
+            }
             String address = JOptionPane.showInputDialog("Enter your address:");
             String customerID = DataIO.getNextUserID();
             DataIO.allCustomer.add(new User(customerID,name,password,phone_number,address));

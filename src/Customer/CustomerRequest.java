@@ -23,7 +23,7 @@ import java.util.List;
                             .append(", ").append(car[3]).append("\n");
                 }
 
-                String selectedCarID = JOptionPane.showInputDialog(null, carList.toString() +
+                String selectedCarID = JOptionPane.showInputDialog(null, carList +
                         "\nEnter the Car ID to request:");
                 if (selectedCarID == null || selectedCarID.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Request canceled.", "Canceled", JOptionPane.INFORMATION_MESSAGE);
