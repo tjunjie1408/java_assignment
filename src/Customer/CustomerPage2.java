@@ -5,31 +5,32 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UserPage2 implements ActionListener {
+public class CustomerPage2 implements ActionListener {
     public void actionPerformed(ActionEvent e){
         try{
             if (e.getSource() == exit){
-                int input = JOptionPane.showConfirmDialog(null,"Do you want logout user features page?");
+                int input = JOptionPane.showConfirmDialog(null,"Do you want logout user features page?","Confirmation", JOptionPane.YES_NO_OPTION);
                 if (input == JOptionPane.YES_OPTION) {
-                    Main.loginUser = null;
+                    Main.loginCustomer = null;
                     Main.first.x.setVisible(true);
                     Main.second.x.setVisible(false);
                 }
 
             }else if(e.getSource() == profile){
-            if (Main.loginUser == null) {
+            if (Main.loginCustomer == null) {
                 JOptionPane.showMessageDialog(null, "No user is currently logged in.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
                 }
-                User currentUser = DataIO.searchName(Main.loginUser.name);
+                User currentUser = DataIO.searchName(Main.loginCustomer.name);
                 Object[] options = {"Edit", "Exit"};
                 int choice = JOptionPane.showOptionDialog(
                         null,
                         "User Profile:\n" +
-                                "ID: " + currentUser.userID + "\n" +
+                                "ID: " + currentUser.customerID + "\n" +
                                 "Name: " + currentUser.name + "\n" +
                                 "Password: " + currentUser.password + "\n" +
-                                "Phone: " + currentUser.phone_number,
+                                "Phone: " + currentUser.phone_number + "\n" +
+                                "Address: " + currentUser.address,
                         "User Profile",
                         JOptionPane.DEFAULT_OPTION,
                         JOptionPane.INFORMATION_MESSAGE,
@@ -47,7 +48,7 @@ public class UserPage2 implements ActionListener {
                        return;
                     }
 
-                    String newPassword = JOptionPane.showInputDialog("Enter new name:", currentUser.password);
+                    String newPassword = JOptionPane.showInputDialog("Enter new password:", currentUser.password);
                     if (newPassword != null && !newPassword.trim().isEmpty()) {
                         currentUser.password = Integer.parseInt(newPassword);
                     }else if (newPassword == null) {
@@ -70,6 +71,14 @@ public class UserPage2 implements ActionListener {
                          JOptionPane.ERROR_MESSAGE);
                     }
 
+                    String newAddress = JOptionPane.showInputDialog("Enter new address:", currentUser.address);
+                    if (newAddress != null && !newAddress.trim().isEmpty()) {
+                        currentUser.address = newAddress;
+                    }else if (newAddress == null) {
+                        JOptionPane.showMessageDialog(null, "Profile edit canceled. Returning to feature page.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+
                     DataIO.write();
                     JOptionPane.showMessageDialog(null,
                             "Profile updated successfully!",
@@ -84,8 +93,10 @@ public class UserPage2 implements ActionListener {
         }else if(e.getSource() == car_detail){
                 //output car details
 
-        }else if(e.getSource() == car_booking){
-                // add order
+        }else if(e.getSource() == car_request){
+            String customerID = "customerID123";
+            CustomerRequest request = new CustomerRequest();
+            request.requestCar(customerID);
 
         }else if(e.getSource() == feedback){
                 int number = DataIO.allfeedback.size()+10001;
@@ -104,9 +115,9 @@ public class UserPage2 implements ActionListener {
                 if(review == null || review.trim().isEmpty()){
                     throw new Exception();
                 }
-                feedback t = new feedback(number,String.valueOf(rating+1),review,Main.loginUser);
+                feedback t = new feedback(number,String.valueOf(rating+1),review,Main.loginCustomer);
                 DataIO.allfeedback.add(t);
-                Main.loginUser.userfeedback.add(t);
+                Main.loginCustomer.userfeedback.add(t);
                 DataIO.write();
                 JOptionPane.showMessageDialog(null,
                         "Thank you for your rating and feedback!",
@@ -121,25 +132,27 @@ public class UserPage2 implements ActionListener {
         }
     }
     JFrame x;
-    Button profile,car_detail,car_booking,feedback,history,exit;
-    public UserPage2(String username){
+    Button profile,car_detail, car_request,feedback,history,exit;
+    public CustomerPage2(String username){
         x = new JFrame();
         x.setSize(600,500);
         x.setLocationRelativeTo(null);
 
-        JLabel welcomeLabel = new JLabel("<html>Welcome " +username+" ! <br>Here is user features page! <br>Please choose the option below:</html>");
+        JLabel welcomeLabel = new JLabel("Welcome " +username+" ! " +
+                "Here is user features page! " +
+                "Please choose the option below:");
         welcomeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 
         profile = new Button("User Profile");
         car_detail = new Button("Car Details");
-        car_booking = new Button("Car Booking");
+        car_request = new Button("Car Booking");
         feedback = new Button("Rating and Feedback");
         history = new Button("Purchase History");
         exit = new Button("Exit");
 
         profile.addActionListener(this);
         car_detail.addActionListener(this);
-        car_booking.addActionListener(this);
+        car_request.addActionListener(this);
         feedback.addActionListener(this);
         history.addActionListener(this);
         exit.addActionListener(this);
@@ -149,7 +162,7 @@ public class UserPage2 implements ActionListener {
 
         x.add(createButtonBox(profile, 200, 50));
         x.add(createButtonBox(car_detail, 200, 50));
-        x.add(createButtonBox(car_booking, 200, 50));
+        x.add(createButtonBox(car_request, 200, 50));
         x.add(createButtonBox(feedback, 200, 50));
         x.add(createButtonBox(history, 200, 50));
         x.add(createButtonBox(exit, 200, 50));

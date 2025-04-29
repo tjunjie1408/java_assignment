@@ -6,19 +6,20 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DataIO {
-    public static ArrayList<User> allUser = new ArrayList<User>();
+    public static ArrayList<User> allCustomer = new ArrayList<User>();
     public static ArrayList<feedback> allfeedback = new ArrayList<feedback>();
     public static ArrayList<CarDetails> allcar = new ArrayList<CarDetails>();
-    public static ArrayList<booking> allbooking = new ArrayList<booking>();
+    public static ArrayList<request> allrequest = new ArrayList<request>();
     public static ArrayList<order> allorder = new ArrayList<order>();
     public static void write(){
         try{
             PrintWriter a = new PrintWriter("User.txt");
-            for(int i=0; i<allUser.size(); i++){
-                a.println(allUser.get(i).userID);
-                a.println(allUser.get(i).name);
-                a.println(allUser.get(i).password);
-                a.println(allUser.get(i).phone_number);
+            for(int i=0; i<allCustomer.size(); i++){
+                a.println(allCustomer.get(i).customerID);
+                a.println(allCustomer.get(i).name);
+                a.println(allCustomer.get(i).password);
+                a.println(allCustomer.get(i).phone_number);
+                a.println(allCustomer.get(i).address);
                 a.println();
             }
             a.close();
@@ -44,11 +45,11 @@ public class DataIO {
             }
             c.close();
 
-            PrintWriter d = new PrintWriter("Booking.txt");
-            for(int i=0; i<allbooking.size(); i++){
-                d.println(allbooking.get(i).bookingID);
-                d.println(allbooking.get(i).car);
-                d.println(allbooking.get(i).owner.name);
+            PrintWriter d = new PrintWriter("CarRequest.txt");
+            for(int i = 0; i< allrequest.size(); i++){
+                d.println(allrequest.get(i).requestID);
+                d.println(allrequest.get(i).car);
+                d.println(allrequest.get(i).owner.name);
                 d.println();
             }
             d.close();
@@ -85,8 +86,9 @@ public class DataIO {
                 String name = s.nextLine();
                 int password = Integer.parseInt(s.nextLine());
                 int phonenumber = Integer.parseInt(s.nextLine());
+                String address = s.nextLine();
                 s.nextLine();
-                allUser.add(new User(userID, name, password, phonenumber));
+                allCustomer.add(new User(userID, name, password, phonenumber,address));
             }
 
             Scanner t = new Scanner(new File("feedback.txt"));
@@ -110,13 +112,13 @@ public class DataIO {
                 allcar.add(new CarDetails(carID,carBrand,carModel,carStatus,carPrice));
             }
 
-            Scanner v = new Scanner(new File("Booking.txt"));
+            Scanner v = new Scanner(new File("CarRequest.txt"));
             while(v.hasNext()){
-                String bookingID = v.nextLine();
+                String requestID = v.nextLine();
                 CarDetails car = searchCar(v.nextLine());
                 User owner = searchName(v.nextLine());
                 v.nextLine();
-                allbooking.add(new booking(bookingID,car,owner));
+                allrequest.add(new request(requestID,car,owner));
             }
 
             Scanner w = new Scanner(new File("Order.txt"));
@@ -135,21 +137,29 @@ public class DataIO {
 
     public static User searchName(String name) {
         if (name == null) return null;
-        for(int i=0; i<allUser.size(); i++){
-            if (name.equals(allUser.get(i).name)) {
-                return allUser.get(i);
+        for(int i=0; i<allCustomer.size(); i++){
+            if (name.equals(allCustomer.get(i).name)) {
+                return allCustomer.get(i);
             }
         }
         return null;
     }
 
     public static String getNextUserID() {
-        if (allUser.isEmpty()) {
+        if (allCustomer.isEmpty()) {
             return "U10001";
         }
-        String lastUserID = allUser.get(allUser.size() - 1).userID;
+        String lastUserID = allCustomer.get(allCustomer.size() - 1).customerID;
         int idNumber = Integer.parseInt(lastUserID.substring(1));
         return "U" + (idNumber + 1);
     }
 
+    public static String getNextRequestID() {
+        if (allrequest.isEmpty()) {
+            return "R10001";
+        }
+        String lastrequestID = allrequest.get(allrequest.size() - 1).requestID;
+        int idNumber = Integer.parseInt(lastrequestID.substring(1));
+        return "R" + (idNumber + 1);
+    }
 }

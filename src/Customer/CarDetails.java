@@ -8,7 +8,7 @@ public class CarDetails {
     String carModel;
     String carStatus;
     int carPrice;
-    ArrayList<booking> allbooking = new ArrayList<booking>();
+    ArrayList<request> allbooking = new ArrayList<request>();
     ArrayList<order> allorder = new ArrayList<order>();
 
     public CarDetails(String carID, String carBrand, String carModel, String carStatus, int carPrice) {

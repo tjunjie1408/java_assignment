@@ -5,11 +5,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UserPage1 implements ActionListener {
+public class CustomerPage1 implements ActionListener {
     public void actionPerformed(ActionEvent e){
     try{
         if(e.getSource() == logout){
-            int input = JOptionPane.showConfirmDialog(null,"Do you want logout user page?");
+            int input = JOptionPane.showConfirmDialog(null, "Do you want to logout user page?", "Confirmation", JOptionPane.YES_NO_OPTION);
             if (input == JOptionPane.YES_OPTION) {
                 System.exit(0);
             }
@@ -20,10 +20,11 @@ public class UserPage1 implements ActionListener {
             }
             int password = Integer.parseInt(JOptionPane.showInputDialog("Enter your password:"));
             int phone_number = Integer.parseInt(JOptionPane.showInputDialog("Enter your phone number:"));
-            String userID = DataIO.getNextUserID();
-            DataIO.allUser.add(new User(userID,name,password,phone_number));
+            String address = JOptionPane.showInputDialog("Enter your address:");
+            String customerID = DataIO.getNextUserID();
+            DataIO.allCustomer.add(new User(customerID,name,password,phone_number,address));
             DataIO.write();
-            JOptionPane.showMessageDialog(null,"Register successfully! Your userID is: " + userID);
+            JOptionPane.showMessageDialog(null,"Register successfully! Your customerID is: " + customerID);
         }else if(e.getSource() == login){
             String name = JOptionPane.showInputDialog("Enter your name:");
             if(DataIO.searchName(name) == null){
@@ -33,19 +34,19 @@ public class UserPage1 implements ActionListener {
             if(password != DataIO.searchName(name).password){
                 throw new Exception();
             }
-            Main.loginUser = DataIO.searchName(name);
-            Main.second = new UserPage2(Main.loginUser.name);
+            Main.loginCustomer = DataIO.searchName(name);
+            Main.second = new CustomerPage2(Main.loginCustomer.name);
             Main.first.x.setVisible(false);
             Main.second.x.setVisible(true);
         }
     }catch (Exception ex){
-        JOptionPane.showMessageDialog(null,"Invalid input!");
+        JOptionPane.showMessageDialog(null,"Unsuccessful login.");
     }
 }
 
     JFrame x;
     Button register, login, logout;
-    public UserPage1(){
+    public CustomerPage1(){
         x = new JFrame();
         x.setSize(300,100);
         x.setLocation(1000,200);
