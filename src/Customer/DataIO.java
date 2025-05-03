@@ -9,7 +9,7 @@ public class DataIO {
     public static ArrayList<User> allCustomer = new ArrayList<User>();
     public static ArrayList<feedback> allfeedback = new ArrayList<feedback>();
     public static ArrayList<CarDetails> allcar = new ArrayList<CarDetails>();
-    public static ArrayList<request> allrequest = new ArrayList<request>();
+    public static ArrayList<CustomerRequest> allrequest = new ArrayList<CustomerRequest>();
     public static ArrayList<order> allorder = new ArrayList<order>();
     public static void write(){
         try{
@@ -26,7 +26,7 @@ public class DataIO {
 
             PrintWriter b = new PrintWriter("feedback.txt");
             for(int i=0; i<allfeedback.size(); i++){
-                b.println(allfeedback.get(i).number);
+                b.println(allfeedback.get(i).feedbackID);
                 b.println(allfeedback.get(i).rating);
                 b.println(allfeedback.get(i).review);
                 b.println(allfeedback.get(i).owner.name);
@@ -39,6 +39,7 @@ public class DataIO {
                 c.println(allcar.get(i).carID);
                 c.println(allcar.get(i).carBrand);
                 c.println(allcar.get(i).carModel);
+                c.println(allcar.get(i).carColour);
                 c.println(allcar.get(i).carStatus);
                 c.println(allcar.get(i).carPrice);
                 c.println();
@@ -49,7 +50,7 @@ public class DataIO {
             for(int i = 0; i< allrequest.size(); i++){
                 d.println(allrequest.get(i).requestID);
                 d.println(allrequest.get(i).car);
-                d.println(allrequest.get(i).owner.name);
+                d.println(allrequest.get(i).owner);
                 d.println();
             }
             d.close();
@@ -68,16 +69,6 @@ public class DataIO {
         }
     }
 
-    public static CarDetails searchCar(String carID) {
-        if (carID == null) return null;
-        for (int i = 0; i < allcar.size(); i++) {
-            if (carID.equals(allcar.get(i).carID)) {
-                return allcar.get(i);
-            }
-        }
-        return null;
-    }
-
     public static void read() {
         try{
             Scanner s = new Scanner(new File("User.txt"));
@@ -93,12 +84,12 @@ public class DataIO {
 
             Scanner t = new Scanner(new File("feedback.txt"));
             while(t.hasNext()){
-                int number = Integer.parseInt(t.nextLine());
+                String feedbackID = t.nextLine();
                 String rating = t.nextLine();
                 String review = t.nextLine();
                 String owner = t.nextLine();
                 t.nextLine();
-                allfeedback.add(new feedback(number,rating,review,searchName(owner)));
+                allfeedback.add(new feedback(feedbackID,rating,review,searchName(owner)));
             }
 
             Scanner u = new Scanner(new File("CarDetails.txt"));
@@ -106,25 +97,26 @@ public class DataIO {
                 String carID = u.nextLine();
                 String carBrand = u.nextLine();
                 String carModel = u.nextLine();
+                String carColour = u.nextLine();
                 String carStatus = u.nextLine();
                 int carPrice = Integer.parseInt(u.nextLine());
                 u.nextLine();
-                allcar.add(new CarDetails(carID,carBrand,carModel,carStatus,carPrice));
+                allcar.add(new CarDetails(carID,carBrand,carModel,carColour,carStatus,carPrice));
             }
 
             Scanner v = new Scanner(new File("CarRequest.txt"));
             while(v.hasNext()){
                 String requestID = v.nextLine();
-                CarDetails car = searchCar(v.nextLine());
+                CarDetails car = getNextCarID(v.nextLine());
                 User owner = searchName(v.nextLine());
                 v.nextLine();
-                allrequest.add(new request(requestID,car,owner));
+                allrequest.add(new CustomerRequest(requestID,car,owner));
             }
 
             Scanner w = new Scanner(new File("Order.txt"));
             while(w.hasNext()){
                 String orderID = w.nextLine();
-                CarDetails car = searchCar(w.nextLine());
+                CarDetails car = getNextCarID(w.nextLine());
                 User owner = searchName(w.nextLine());
                 w.nextLine();
                 allorder.add(new order(orderID,car,owner));
@@ -152,6 +144,25 @@ public class DataIO {
         String lastUserID = allCustomer.get(allCustomer.size() - 1).customerID;
         int idNumber = Integer.parseInt(lastUserID.substring(1));
         return "U" + (idNumber + 1);
+    }
+
+    public static String getNextFeedbackID() {
+        if (allfeedback.isEmpty()) {
+            return "F10001";
+        }
+        String lastFeedbackID = allfeedback.get(allfeedback.size() - 1).feedbackID;
+        int idNumber = Integer.parseInt(lastFeedbackID.substring(1));
+        return "F" + (idNumber + 1);
+    }
+
+
+    public static CarDetails getNextCarID(String selectedCarID) {
+        for(int i=0; i<allcar.size(); i++){
+            if(selectedCarID.equals(allcar.get(i).carID)){
+                return allcar.get(i);
+            }
+        }
+        return null;
     }
 
     public static String getNextRequestID() {

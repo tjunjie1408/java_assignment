@@ -31,6 +31,9 @@ public class CustomerPage1 implements ActionListener {
                 throw new Exception();
             }
             String address = JOptionPane.showInputDialog("Enter your address:");
+            if(address == null){
+                return;
+            }
             String customerID = DataIO.getNextUserID();
             DataIO.allCustomer.add(new User(customerID,name,password,phone_number,address));
             DataIO.write();

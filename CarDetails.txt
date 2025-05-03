@@ -1,0 +1,28 @@
+C10001
+Perodua
+Bezza
+White
+Available
+38000
+
+C10002
+Perodua
+Myvi
+Blue
+Not Available
+50000
+
+C10003
+Honda
+Civic
+Black
+Not Available
+90000
+
+C10004
+Honda
+City
+Silver
+Available
+79000
+
