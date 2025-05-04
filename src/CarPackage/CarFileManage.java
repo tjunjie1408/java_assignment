@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FileHandling {
-    private static final Logger logger = Logger.getLogger(FileHandling.class.getName());
-    private static final String HEADER = "# ID,Make,Model,Year,Price,Color,Status";
+public class CarFileManage {
+    private static final Logger logger = Logger.getLogger(CarFileManage.class.getName());
+    private static final String HEADER = "# ID,Model,Year,Price,Color,Status";
     private Path filePath;
 
-    public FileHandling(String path) {
+    public CarFileManage(String path) {
         this.filePath = Paths.get(path);
     }
 

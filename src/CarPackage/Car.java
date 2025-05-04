@@ -2,16 +2,14 @@ package CarPackage;
 
 public class Car {
     private String id;
-    private String make;
     private String model;
     private int year;
     private double price;
     private String color;
     private String status;
 
-    public Car(String id, String make, String model, int year, double price, String color, String status) {
+    public Car(String id, String model, int year, double price, String color, String status) {
         this.id = id;
-        this.make = make;
         this.model = model;
         this.year = year;
         this.price = price;
@@ -22,14 +20,11 @@ public class Car {
 
 
     public Car() {
-        this("", "", "", 0, 0.0, "", "available");
+        this("",  "", 0, 0.0, "", "available");
     }
 
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
-
-    public String getMake() {return make;}
-    public void setMake(String make) {this.make = make;}
 
     public String getModel() {return model;}
     public void setModel(String model) {this.model = model;}
@@ -48,12 +43,12 @@ public class Car {
 
     @Override
     public String toString() {
-        return String.format("Car[id=%s, make=%s, model=%s, year=%d, price=%.2f, color=%s, status=%s]",
-                id, make, model, year, price, color, status);
+        return String.format("Car[id=%s, model=%s, year=%d, price=%.2f, color=%s, status=%s]",
+                id, model, year, price, color, status);
     }
 
     public String toFileString() {
-        return String.join(",", id, make, model,
+        return String.join(",", id, model,
                 String.valueOf(year), String.valueOf(price), color, status);
     }
 
@@ -61,10 +56,10 @@ public class Car {
         String[] parts = line.split(",", -1);
         if (parts.length != 7) return null;
         try {
-            return new Car(parts[0], parts[1], parts[2],
-                    Integer.parseInt(parts[3]),
-                    Double.parseDouble(parts[4]),
-                    parts[5], parts[6]);
+            return new Car( parts[0], parts[1],
+                    Integer.parseInt(parts[2]),
+                    Double.parseDouble(parts[3]),
+                    parts[4], parts[5]);
         } catch (Exception e) {
             return null;
         }

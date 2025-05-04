@@ -11,7 +11,7 @@ public class CarSystem {
     private final CarInventory inventory;
 
     public CarSystem(String dataFilePath) throws IOException {
-        FileHandling fileHandling = new FileHandling(dataFilePath);
+        CarFileManage fileHandling = new CarFileManage(dataFilePath);
         this.inventory = new CarInventory(fileHandling);
         logger.info(String.format("System started, %d vehicle records loaded", inventory.size()));
     }
@@ -44,8 +44,8 @@ public class CarSystem {
         }
     }
 
-    public boolean addCar(String id, String make, String model, int year, double price, String color, String status) {
-        Car car = new Car(id, make, model, year, price, color, status);
+    public boolean addCar(String id, String model, int year, double price, String color, String status) {
+        Car car = new Car(id, model, year, price, color, status);
         return addCar(car);
     }
 
@@ -77,9 +77,6 @@ public class CarSystem {
         return inventory.getAllCars();
     }
 
-    public List<Car> searchCarsByMake(String make) {
-        return inventory.searchCarsByMake(make);
-    }
 
     public List<Car> searchCarsByModel(String model) {
         return inventory.searchCarsByModel(model);

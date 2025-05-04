@@ -7,10 +7,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CarInventory {
-    private final FileHandling fileHandler;
+    private final CarFileManage fileHandler;
     private final List<Car> cars;
 
-    public CarInventory(FileHandling fileHandler) throws IOException {
+    public CarInventory(CarFileManage fileHandler) throws IOException {
         this.fileHandler = Objects.requireNonNull(fileHandler);
         this.cars = new ArrayList<>(fileHandler.loadCarsFile());
     }
@@ -58,7 +58,7 @@ public class CarInventory {
         return cars.size();
     }
 
-    public FileHandling getFileHandler() {
+    public CarFileManage getFileHandler() {
         return fileHandler;
     }
 
@@ -67,11 +67,6 @@ public class CarInventory {
         this.cars.addAll(newCars);
     }
 
-    public List<Car> searchCarsByMake(String make) {
-        return cars.stream()
-                .filter(c -> c.getMake().equalsIgnoreCase(make))
-                .collect(Collectors.toList());
-    }
 
     public List<Car> searchCarsByModel(String model) {
         return cars.stream()
