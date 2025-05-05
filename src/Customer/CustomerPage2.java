@@ -5,13 +5,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CustomerPage2 implements ActionListener {
     public void actionPerformed(ActionEvent e) {
@@ -98,191 +95,231 @@ public class CustomerPage2 implements ActionListener {
                     JOptionPane.showMessageDialog(null, "User profile not found.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
-            } else if (e.getSource() == car_request) {
-                try {
-                    List<String> carDetails = new ArrayList<>();
-                    try (BufferedReader reader = new BufferedReader(new FileReader("CarDetails.txt"))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            if (!line.isBlank()) carDetails.add(line);
+        } else if (e.getSource() == car_detail) {
+                JFrame carFrame = new JFrame("Select Car by Brand & Model");
+                carFrame.setSize(400, 300);
+                carFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                carFrame.setLayout(null);
+
+                ArrayList<CarDetails> carDetailsList = new ArrayList<>();
+                LinkedHashSet<String> carBrandSet = new LinkedHashSet<>();
+                List<JFrame> detailsFrames = new ArrayList<>();
+
+                JComboBox<String> carBrandDropdown = new JComboBox<>();
+                JComboBox<String> carModelDropdown = new JComboBox<>();
+                JButton enterButton = new JButton("Enter");
+                JButton exitButton = new JButton("Exit");
+
+                try (BufferedReader reader = new BufferedReader(new FileReader("CarDetails.txt"))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.trim().isEmpty()) {
+                            continue;
                         }
-                    }
 
-                    List<String[]> availableCars = new ArrayList<>();
-                    Set<String> availableBrands = new LinkedHashSet<>();
-                    for (int i = 0; i < carDetails.size(); i += 6) {
-                        String carID = carDetails.get(i);
-                        String brand = carDetails.get(i + 1);
-                        String model = carDetails.get(i + 2);
-                        String colour = carDetails.get(i + 3);
-                        String status = carDetails.get(i + 4).trim();
-                        String priceStr = carDetails.get(i + 5).trim();
-                        double price;
+                        String carBrand = reader.readLine();
+                        String carModel = reader.readLine();
+                        String carColour = reader.readLine();
+                        String carStatus = reader.readLine();
+                        String carPriceString = reader.readLine();
 
-                        // Validate and parse the car price
+                        if (carBrand == null || carModel == null || carColour == null
+                                || carStatus == null || carPriceString == null) {
+                            throw new IllegalArgumentException("CarDetails.txt file is incomplete or improperly formatted.");
+                        }
+
+                        int carPrice;
                         try {
-                            price = Double.parseDouble(priceStr);
-                        } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(
-                                    null,
-                                    "Invalid price format in CarDetails.txt for Car ID: " + carID + ". Please fix the file.",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
-                            continue; // Skip invalid entries
+                            carPrice = Integer.parseInt(carPriceString.trim());
+                        } catch (NumberFormatException nfe) {
+                            throw new NumberFormatException("Invalid car price value: " + carPriceString);
                         }
 
-                        if ("Available".equalsIgnoreCase(status)) {
-                            String[] car = {carID, brand, model, colour, status, String.valueOf(price)};
-                            availableCars.add(car);
-                            availableBrands.add(brand);
+                        if (!"Available".equalsIgnoreCase(carStatus.trim())) {
+                            continue;
+                        }
+
+                        carBrandSet.add(carBrand.trim());
+
+                        carDetailsList.add(new CarDetails(line, carBrand.trim(),
+                                carModel.trim(), carColour.trim(), carStatus.trim(), carPrice));
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(carFrame,
+                            "Error loading car details. Please check the file format.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                carBrandDropdown.addItem("Select Brand");
+                for (String brand : carBrandSet) {
+                    carBrandDropdown.addItem(brand);
+                }
+
+                carModelDropdown.addItem("Select Model");
+
+                carBrandDropdown.addActionListener(event -> {
+                    String selectedBrand = (String) carBrandDropdown.getSelectedItem();
+
+                    if (!"Select Brand".equalsIgnoreCase(selectedBrand)) {
+                        carModelDropdown.removeAllItems();
+                        carModelDropdown.addItem("Select Model");
+
+                        LinkedHashSet<String> uniqueModels = new LinkedHashSet<>();
+                        for (CarDetails car : carDetailsList) {
+                            if (car.carBrand.equalsIgnoreCase(selectedBrand)) {
+                                uniqueModels.add(car.carModel);
+                            }
+                        }
+
+                        for (String model : uniqueModels) {
+                            carModelDropdown.addItem(model);
                         }
                     }
+                });
 
-                    if (availableBrands.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "No available cars at the moment.");
+                enterButton.addActionListener(event -> {
+                    String selectedBrand = (String) carBrandDropdown.getSelectedItem();
+                    String selectedModel = (String) carModelDropdown.getSelectedItem();
+
+                    if (!"Select Brand".equalsIgnoreCase(selectedBrand) &&
+                            !"Select Model".equalsIgnoreCase(selectedModel)) {
+                        JFrame detailsFrame = new JFrame("Car Details - " + selectedBrand + " " + selectedModel);
+                        detailsFrame.setSize(400, 400);
+                        detailsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+                        JPanel detailsPanel = new JPanel();
+                        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+                        detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+                        for (CarDetails car : carDetailsList) {
+                            if (car.carBrand.equalsIgnoreCase(selectedBrand) &&
+                                    car.carModel.equalsIgnoreCase(selectedModel)) {
+                                detailsPanel.add(new JLabel("ID: " + car.carID));
+                                detailsPanel.add(new JLabel("Brand: " + car.carBrand));
+                                detailsPanel.add(new JLabel("Model: " + car.carModel));
+                                detailsPanel.add(new JLabel("Colour: " + car.carColour));
+                                detailsPanel.add(new JLabel("Status: " + car.carStatus));
+                                detailsPanel.add(new JLabel("Price: $" + car.carPrice));
+                                detailsPanel.add(new JLabel("--------------------------"));
+                            }
+                        }
+
+                        detailsFrame.add(new JScrollPane(detailsPanel));
+                        detailsFrames.add(detailsFrame);
+                        detailsFrame.setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(carFrame,
+                                "Please select both Brand and Model.",
+                                "Warning",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                });
+
+                exitButton.addActionListener(event -> {
+                    for (JFrame detailsFrame : detailsFrames) {
+                        detailsFrame.dispose();
+                    }
+                    carFrame.dispose();
+                });
+
+                JLabel brandLabel = new JLabel("Select Brand:");
+                brandLabel.setBounds(50, 50, 100, 30);
+                carBrandDropdown.setBounds(150, 50, 200, 30);
+
+                JLabel modelLabel = new JLabel("Select Model:");
+                modelLabel.setBounds(50, 100, 100, 30);
+                carModelDropdown.setBounds(150, 100, 200, 30);
+
+                enterButton.setBounds(150, 150, 100, 30);
+                exitButton.setBounds(150, 200, 100, 30);
+
+                carFrame.add(brandLabel);
+                carFrame.add(carBrandDropdown);
+                carFrame.add(modelLabel);
+                carFrame.add(carModelDropdown);
+                carFrame.add(enterButton);
+                carFrame.add(exitButton);
+
+                carFrame.setVisible(true);
+                carFrame.setLocationRelativeTo(null);
+
+        }else if (e.getSource() == feedback) {
+                JFrame ratingFrame = new JFrame("Rate Our Service");
+                ratingFrame.setSize(400, 300);
+                ratingFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                ratingFrame.setLayout(null);
+
+                JLabel promptLabel = new JLabel("Please rate the service:");
+                promptLabel.setBounds(50, 30, 300, 30);
+
+                JSlider ratingSlider = new JSlider(1, 5, 3); // Min: 1, Max: 5, Default: 3
+                ratingSlider.setBounds(50, 70, 300, 50);
+                ratingSlider.setMajorTickSpacing(1);
+                ratingSlider.setPaintLabels(true);
+                ratingSlider.setPaintTicks(true);
+
+                JLabel feedbackLabel = new JLabel("Enter your feedback:");
+                feedbackLabel.setBounds(50, 130, 300, 30);
+
+                JTextField feedbackField = new JTextField();
+                feedbackField.setBounds(50, 170, 300, 30);
+
+                JButton submitButton = new JButton("Submit");
+                submitButton.setBounds(50, 220, 100, 30);
+
+                JButton exitButton = new JButton("Exit");
+                exitButton.setBounds(250, 220, 100, 30);
+
+                submitButton.addActionListener(event -> {
+                    int selectedRating = ratingSlider.getValue();
+                    String review = feedbackField.getText();
+
+                    if (review == null || review.trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(ratingFrame,
+                                "Feedback cannot be empty. Please provide a review.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
-                    String selectedBrand = (String) JOptionPane.showInputDialog(
-                            null,
-                            "Select a car brand:",
-                            "Available Brands",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            availableBrands.toArray(),
-                            availableBrands.iterator().next()
-                    );
+                    String feedbackID = DataIO.getNextFeedbackID();
+                    DataIO.allfeedback.add(new feedback(feedbackID, String.valueOf(selectedRating), review, Main.loginCustomer));
+                    DataIO.write();
 
-                    if (selectedBrand != null) {
-                        // Prompt user to enter max price
-                        String priceInput = JOptionPane.showInputDialog(
-                                null,
-                                "Enter your maximum price:",
-                                "Filter by Price",
-                                JOptionPane.QUESTION_MESSAGE
-                        );
+                    // Success message
+                    JOptionPane.showMessageDialog(ratingFrame,
+                            "Thank you for your rating and feedback!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
 
-                        if (priceInput != null && !priceInput.isBlank()) {
-                            try {
-                                double maxPrice = Double.parseDouble(priceInput);
-                                if (maxPrice < 0) {
-                                    throw new NumberFormatException("Price cannot be negative.");
-                                }
+                    ratingFrame.dispose();
+                });
 
-                                // Filter available cars by selected brand and max price
-                                List<String[]> matchingCars = new ArrayList<>();
-                                for (String[] car : availableCars) {
-                                    if (car[1].equalsIgnoreCase(selectedBrand) && Double.parseDouble(car[5]) <= maxPrice) {
-                                        matchingCars.add(car);
-                                    }
-                                }
+                exitButton.addActionListener(event -> {
+                    int confirmation = JOptionPane.showConfirmDialog(ratingFrame,
+                            "Are you sure you want to exit without providing feedback?",
+                            "Exit Confirmation",
+                            JOptionPane.YES_NO_OPTION);
 
-                                if (matchingCars.isEmpty()) {
-                                    JOptionPane.showMessageDialog(
-                                            null,
-                                            "No cars match your selected brand and price range.",
-                                            "No Matches Found",
-                                            JOptionPane.INFORMATION_MESSAGE
-                                    );
-                                    return;
-                                }
-
-                                String[] carOptions = matchingCars.stream()
-                                        .map(car -> "Car ID: " + car[0] + ", Model: " + car[2] + ", Colour: " + car[3] + " (RM" + car[5] + ")")
-                                        .toArray(String[]::new);
-
-                                String selectedCar = (String) JOptionPane.showInputDialog(
-                                        null,
-                                        "Select a car to book:",
-                                        "Available Cars within Price Range: RM" + maxPrice,
-                                        JOptionPane.QUESTION_MESSAGE,
-                                        null,
-                                        carOptions,
-                                        carOptions[0]
-                                );
-
-                                if (selectedCar != null) {
-                                    for (String[] car : matchingCars) {
-                                        if (selectedCar.contains(car[0])) {
-                                            String requestDetails = "RequestID: " + DataIO.getNextRequestID() + "\n"
-                                                    + "Car ID: " + car[0] + "\n"
-                                                    + "UserID: " + Main.loginCustomer.name + "\n\n";
-
-                                            try (BufferedWriter requestWriter = new BufferedWriter(new FileWriter("CarRequest.txt", true))) {
-                                                requestWriter.write(requestDetails);
-                                            }
-
-                                            // Mark car as not available
-                                            for (int i = 0; i < carDetails.size(); i += 6) {
-                                                if (carDetails.get(i).equalsIgnoreCase(car[0])) {
-                                                    carDetails.set(i + 4, "Not Available");
-                                                    break;
-                                                }
-                                            }
-
-                                            // Update CarDetails.txt file
-                                            try (BufferedWriter carDetailsWriter = new BufferedWriter(new FileWriter("CarDetails.txt", false))) {
-                                                for (int i = 0; i < carDetails.size(); i++) {
-                                                    carDetailsWriter.write(carDetails.get(i));
-                                                    carDetailsWriter.newLine();
-                                                    if ((i + 1) % 6 == 0) carDetailsWriter.newLine();
-                                                }
-                                            }
-
-                                            JOptionPane.showMessageDialog(
-                                                    null,
-                                                    "Car booked successfully! Your request has been recorded.",
-                                                    "Booking Confirmation",
-                                                    JOptionPane.INFORMATION_MESSAGE
-                                            );
-                                            return;
-                                        }
-                                    }
-                                }
-                            } catch (NumberFormatException ex) {
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "Invalid price entered. Please enter a non-negative number.",
-                                        "Error",
-                                        JOptionPane.ERROR_MESSAGE
-                                );
-                            }
-                        }
+                    if (confirmation == JOptionPane.YES_OPTION) {
+                        ratingFrame.dispose();
                     }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "An error occurred: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
-        }else if(e.getSource() == feedback){
-            Object[] options = {"1", "2", "3", "4", "5"};
-                Integer rating = JOptionPane.showOptionDialog(
-                        null,
-                        "Please rate the service",
-                        "Rating",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                String review = JOptionPane.showInputDialog("Enter your feedback:");
-                if(review == null || review.trim().isEmpty()){
-                    throw new Exception();
-                }
-                String feedbackID = DataIO.getNextFeedbackID();
-                DataIO.allfeedback.add(new feedback(feedbackID, String.valueOf(rating), review, Main.loginCustomer));
-                DataIO.write();
-                JOptionPane.showMessageDialog(null,
-                        "Thank you for your rating and feedback!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                });
 
-        }else if(e.getSource() == history) {
+                ratingFrame.add(promptLabel);
+                ratingFrame.add(ratingSlider);
+                ratingFrame.add(feedbackLabel);
+                ratingFrame.add(feedbackField);
+                ratingFrame.add(submitButton);
+                ratingFrame.add(exitButton);
+
+                ratingFrame.setVisible(true);
+                ratingFrame.setLocationRelativeTo(null);
+
+            }else if(e.getSource() == history) {
                 String currentUserID = Main.loginCustomer.customerID;
 
                 StringBuilder orderHistory = new StringBuilder();
@@ -301,7 +338,7 @@ public class CustomerPage2 implements ActionListener {
                     JOptionPane.showMessageDialog(null, "No orders found for your account.", "Order History", JOptionPane.INFORMATION_MESSAGE);
                 }
 
-            }else if(e.getSource() == loancalculate) {
+        }else if(e.getSource() == loancalculate) {
                 JTextField totalAmountField = new JTextField(10);
                 JTextField downPaymentField = new JTextField(10);
                 JTextField interestRateField = new JTextField(10);
@@ -340,15 +377,14 @@ public class CustomerPage2 implements ActionListener {
                         JOptionPane.showMessageDialog(null, "Please enter valid numeric values!", "Input Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
-
-
             }
         }catch(Exception ex){
             JOptionPane.showMessageDialog(null,"Invalid input!");
         }
     }
+
     JFrame x;
-    Button profile, car_request,feedback,history,loancalculate,exit;
+    Button profile, car_detail,feedback,history,loancalculate,exit;
     public CustomerPage2(String username){
         x = new JFrame();
         x.setSize(400,450);
@@ -362,14 +398,14 @@ public class CustomerPage2 implements ActionListener {
         welcomeLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
 
         profile = new Button("User Profile");
-        car_request = new Button("Booking Request");
+        car_detail = new Button("Car Available");
         feedback = new Button("Rating and Feedback");
         history = new Button("Purchase History");
         loancalculate = new Button("Loan Calculator");
         exit = new Button("Exit");
 
         profile.addActionListener(this);
-        car_request.addActionListener(this);
+        car_detail.addActionListener(this);
         feedback.addActionListener(this);
         history.addActionListener(this);
         loancalculate.addActionListener(this);
@@ -378,7 +414,7 @@ public class CustomerPage2 implements ActionListener {
         x.setLayout(new BoxLayout(x.getContentPane(), BoxLayout.Y_AXIS));
         x.add(welcomeLabel);
         x.add(createButtonBox(profile));
-        x.add(createButtonBox(car_request));
+        x.add(createButtonBox(car_detail));
         x.add(createButtonBox(feedback));
         x.add(createButtonBox(history));
         x.add(createButtonBox(loancalculate));

@@ -9,7 +9,6 @@ public class DataIO {
     public static ArrayList<User> allCustomer = new ArrayList<User>();
     public static ArrayList<feedback> allfeedback = new ArrayList<feedback>();
     public static ArrayList<CarDetails> allcar = new ArrayList<CarDetails>();
-    public static ArrayList<CustomerRequest> allrequest = new ArrayList<CustomerRequest>();
     public static ArrayList<order> allorder = new ArrayList<order>();
     public static void write(){
         try{
@@ -45,15 +44,6 @@ public class DataIO {
                 c.println();
             }
             c.close();
-
-            PrintWriter d = new PrintWriter("CarRequest.txt");
-            for(int i = 0; i< allrequest.size(); i++){
-                d.println(allrequest.get(i).requestID);
-                d.println(allrequest.get(i).car);
-                d.println(allrequest.get(i).owner);
-                d.println();
-            }
-            d.close();
 
             PrintWriter e = new PrintWriter("Order.txt");
             for(int i=0; i<allorder.size(); i++){
@@ -102,15 +92,6 @@ public class DataIO {
                 int carPrice = Integer.parseInt(u.nextLine());
                 u.nextLine();
                 allcar.add(new CarDetails(carID,carBrand,carModel,carColour,carStatus,carPrice));
-            }
-
-            Scanner v = new Scanner(new File("CarRequest.txt"));
-            while(v.hasNext()){
-                String requestID = v.nextLine();
-                CarDetails car = getNextCarID(v.nextLine());
-                User owner = searchName(v.nextLine());
-                v.nextLine();
-                allrequest.add(new CustomerRequest(requestID,car,owner));
             }
 
             Scanner w = new Scanner(new File("Order.txt"));
@@ -163,14 +144,5 @@ public class DataIO {
             }
         }
         return null;
-    }
-
-    public static String getNextRequestID() {
-        if (allrequest.isEmpty()) {
-            return "R10001";
-        }
-        String lastrequestID = allrequest.get(allrequest.size() - 1).requestID;
-        int idNumber = Integer.parseInt(lastrequestID.substring(1));
-        return "R" + (idNumber + 1);
     }
 }

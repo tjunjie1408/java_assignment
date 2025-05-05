@@ -9,14 +9,14 @@ C10002
 Perodua
 Myvi
 Blue
-Not Available
+Available
 50000
 
 C10003
 Honda
 Civic
 Black
-Not Available
+Available
 90000
 
 C10004
@@ -25,4 +25,11 @@ City
 Silver
 Available
 79000
+
+C10005
+Perodua
+Myvi
+Red
+Available
+50000
 
