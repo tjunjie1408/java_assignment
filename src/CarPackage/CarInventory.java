@@ -1,94 +1,92 @@
 package CarPackage;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.io.*;
+import java.util.*;
 
 public class CarInventory {
-    private final CarFileManage fileHandler;
-    private final List<Car> cars;
+    private HashMap<String, Car> cars;
+    private static final String FILE_NAME = "cars.txt";
 
-    public CarInventory(CarFileManage fileHandler) throws IOException {
-        this.fileHandler = Objects.requireNonNull(fileHandler);
-        this.cars = new ArrayList<>(fileHandler.loadCarsFile());
-    }
-
-    private boolean isValid(Car car) {
-        return car != null
-                && car.getId() != null && !car.getId().isEmpty()
-                && car.getYear() >= 1900 && car.getYear() <= 2100
-                && car.getPrice() > 0;
+    public CarInventory() {
+        cars = new HashMap<>();
+        loadCars();
     }
 
     public boolean addCar(Car car) {
-        if (!isValid(car)) return false;
-        if (cars.stream().anyMatch(c -> c.getId().equals(car.getId()))) return false;
-        cars.add(car);
+        if (cars.containsKey(car.getCarId())) {
+            return false; // Car ID already exists
+        }
+        cars.put(car.getCarId(), car);
+        saveCars();
         return true;
     }
 
-    public boolean deleteCar(String id) {
-        return cars.removeIf(c -> c.getId().equals(id));
+    public Car searchCar(String carId) {
+        return cars.get(carId);
     }
 
-    public boolean updateCar(Car updated) {
-        if (!isValid(updated)) return false;
-        for (int i = 0; i < cars.size(); i++) {
-            if (cars.get(i).getId().equals(updated.getId())) {
-                cars.set(i, updated);
-                return true;
+    public List<Car> searchCarsByBrand(String brand) {
+        List<Car> result = new ArrayList<>();
+        for (Car car : cars.values()) {
+            if (car.getBrand().equalsIgnoreCase(brand)) {
+                result.add(car);
             }
         }
-        return false;
-    }
-
-    public Car searchCar(String id) {
-        return cars.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst().orElse(null);
-    }
-
-    public List<Car> getAllCars() {
-        return new ArrayList<>(cars);
-    }
-
-    public int size() {
-        return cars.size();
-    }
-
-    public CarFileManage getFileHandler() {
-        return fileHandler;
-    }
-
-    public void setCars(List<Car> newCars) {
-        this.cars.clear();
-        this.cars.addAll(newCars);
-    }
-
-
-    public List<Car> searchCarsByModel(String model) {
-        return cars.stream()
-                .filter(c -> c.getModel().equalsIgnoreCase(model))
-                .collect(Collectors.toList());
-    }
-
-    public List<Car> searchCarsByPriceRange(double min, double max) {
-        return cars.stream()
-                .filter(c -> c.getPrice() >= min && c.getPrice() <= max)
-                .collect(Collectors.toList());
+        return result;
     }
 
     public List<Car> searchCarsByStatus(String status) {
-        return cars.stream()
-                .filter(c -> c.getStatus().equalsIgnoreCase(status))
-                .collect(Collectors.toList());
+        List<Car> result = new ArrayList<>();
+        for (Car car : cars.values()) {
+            if (car.getStatus().equalsIgnoreCase(status)) {
+                result.add(car);
+            }
+        }
+        return result;
     }
 
-    public List<Car> searchCarsByYear(int year) {
-        return cars.stream()
-                .filter(c -> c.getYear() == year)
-                .collect(Collectors.toList());
+    public boolean updateCar(String carId, Car newCar) {
+        if (!cars.containsKey(carId)) {
+            return false; // Car not found
+        }
+        cars.put(carId, newCar);
+        saveCars();
+        return true;
+    }
+
+    public boolean deleteCar(String carId) {
+        if (!cars.containsKey(carId)) {
+            return false; // Car not found
+        }
+        cars.remove(carId);
+        saveCars();
+        return true;
+    }
+
+    public List<Car> getAllCars() {
+        return new ArrayList<>(cars.values());
+    }
+
+    private void loadCars() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Car car = Car.fromCSV(line);
+                cars.put(car.getCarId(), car);
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading cars: " + e.getMessage());
+        }
+    }
+
+    private void saveCars() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (Car car : cars.values()) {
+                writer.write(car.toCSV());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving cars: " + e.getMessage());
+        }
     }
 }

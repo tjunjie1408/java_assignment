@@ -12,7 +12,7 @@ public class MainCar {
             try {
                 CarSystem carSystem = new CarSystem("cars.txt");
                 JFrame frame = new JFrame("CarUI");
-                frame.setContentPane(new CarUI().panel1);
+                frame.setContentPane(new AddCarUI().panel1);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setVisible(true);

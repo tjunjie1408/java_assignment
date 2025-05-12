@@ -1,108 +1,191 @@
 package CarPackage;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import javax.swing.*;
+import java.awt.event.*;
 
 public class CarSystem {
-    private static final Logger logger = Logger.getLogger(CarSystem.class.getName());
-    private final CarInventory inventory;
+    private CarFileManage carManager;
+    private List<CarSystemListener> listeners;
 
-    public CarSystem(String dataFilePath) throws IOException {
-        CarFileManage fileHandling = new CarFileManage(dataFilePath);
-        this.inventory = new CarInventory(fileHandling);
-        logger.info(String.format("System started, %d vehicle records loaded", inventory.size()));
+    public CarSystem() {
+        carManager = new CarFileManage();
+        listeners = new ArrayList<>();
     }
 
-    public boolean saveInventoryData() {
-        try {
-            inventory.getFileHandler().saveCarsToFile(inventory.getAllCars());
-            return true;
-        } catch (UncheckedIOException e) {
-            logger.log(Level.SEVERE, "Failure to save inventory data", e);
-            return false;
+    // Listener interface for GUI updates
+    public interface CarSystemListener {
+        void onCarAdded(Car car);
+        void onCarUpdated(Car car);
+        void onCarDeleted(String carId);
+        void onError(String message);
+        void onDataLoaded(List<Car> cars);
+    }
+
+    // Add listener for GUI updates
+    public void addListener(CarSystemListener listener) {
+        listeners.add(listener);
+    }
+
+    // Remove listener
+    public void removeListener(CarSystemListener listener) {
+        listeners.remove(listener);
+    }
+
+    // Notify all listeners
+    private void notifyListeners(String event, Object data) {
+        for (CarSystemListener listener : listeners) {
+            try {
+                switch (event) {
+                    case "ADD":
+                        listener.onCarAdded((Car) data);
+                        break;
+                    case "UPDATE":
+                        listener.onCarUpdated((Car) data);
+                        break;
+                    case "DELETE":
+                        listener.onCarDeleted((String) data);
+                        break;
+                    case "ERROR":
+                        listener.onError((String) data);
+                        break;
+                    case "LOAD":
+                        listener.onDataLoaded((List<Car>) data);
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("Error notifying listener: " + e.getMessage());
+            }
         }
     }
 
-    public boolean createDataBackup() {
-        boolean ok = inventory.getFileHandler().createBackup();
-        if (!ok) {
-            logger.warning("Failed to create data backup");
-        }
-        return ok;
-    }
+    // CRUD Operations
 
+    // Create
     public boolean addCar(Car car) {
-        if (inventory.addCar(car)) {
-            logger.info("Vehicle added successfully: ID=" + car.getId());
-            return saveInventoryData();
-        } else {
-            logger.warning("Failed to add vehicle (invalid or duplicate) ID=" + car.getId());
-            return false;
+        try {
+            if (carManager.addCar(car)) {
+                notifyListeners("ADD", car);
+                return true;
+            }
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error adding car: " + e.getMessage());
         }
+        return false;
     }
 
-    public boolean addCar(String id, String model, int year, double price, String color, String status) {
-        Car car = new Car(id, model, year, price, color, status);
-        return addCar(car);
-    }
-
-    public boolean deleteCar(String id) {
-        if (inventory.deleteCar(id)) {
-            logger.info("Delete Vehicle Successfully: ID=" + id);
-            return saveInventoryData();
-        } else {
-            logger.warning("Failed to delete vehicle (not found) ID=" + id);
-            return false;
-        }
-    }
-
-    public Car findCarById(String id) {
-        return inventory.searchCar(id);
-    }
-
-    public boolean updateCar(Car car) {
-        if (inventory.updateCar(car)) {
-            logger.info("Vehicle updated successfully. ID=" + car.getId());
-            return saveInventoryData();
-        } else {
-            logger.warning("Failed to update vehicle (invalid or not found) ID=" + car.getId());
-            return false;
+    // Read
+    public Car getCar(String carId) {
+        try {
+            return carManager.getCar(carId);
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error getting car: " + e.getMessage());
+            return null;
         }
     }
 
     public List<Car> getAllCars() {
-        return inventory.getAllCars();
+        try {
+            List<Car> cars = carManager.getAllCars();
+            notifyListeners("LOAD", cars);
+            return cars;
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error getting all cars: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-
-    public List<Car> searchCarsByModel(String model) {
-        return inventory.searchCarsByModel(model);
+    public List<Car> searchByBrand(String brand) {
+        try {
+            return carManager.searchByBrand(brand);
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error searching by brand: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public List<Car> searchCarsByPriceRange(double minPrice, double maxPrice) {
-        return inventory.searchCarsByPriceRange(minPrice, maxPrice);
+    public List<Car> searchByStatus(String status) {
+        try {
+            return carManager.searchByStatus(status);
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error searching by status: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public List<Car> searchCarsByStatus(String status) {
-        return inventory.searchCarsByStatus(status);
+    public List<Car> searchByPriceRange(double minPrice, double maxPrice) {
+        try {
+            return carManager.searchByPriceRange(minPrice, maxPrice);
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error searching by price range: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public List<Car> searchCarsByYear(int year) {
-        return inventory.searchCarsByYear(year);
+    // Update
+    public boolean updateCar(String carId, Car newCar) {
+        try {
+            if (carManager.updateCar(carId, newCar)) {
+                notifyListeners("UPDATE", newCar);
+                return true;
+            }
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error updating car: " + e.getMessage());
+        }
+        return false;
     }
 
-    public int getInventorySize() {
-        return inventory.size();
+    // Delete
+    public boolean deleteCar(String carId) {
+        try {
+            if (carManager.deleteCar(carId)) {
+                notifyListeners("DELETE", carId);
+                return true;
+            }
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error deleting car: " + e.getMessage());
+        }
+        return false;
     }
 
-    public void changeDataFilePath(String newPath) {
-        inventory.getFileHandler().setFilePath(newPath);
+    // Statistics and Reports
+    public Map<String, Integer> getCarsByStatusCount() {
+        try {
+            return carManager.getCarsByStatusCount();
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error getting status count: " + e.getMessage());
+            return new HashMap<>();
+        }
     }
 
-    public String getDataFilePath() {
-        return inventory.getFileHandler().getFilePath();
+    public Map<String, Integer> getCarsByBrandCount() {
+        try {
+            return carManager.getCarsByBrandCount();
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error getting brand count: " + e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    public int getTotalCars() {
+        return carManager.getTotalCars();
+    }
+
+    // Backup and Maintenance
+    public void backupData() {
+        try {
+            carManager.backupCars();
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error backing up data: " + e.getMessage());
+        }
+    }
+
+    public void clearAllCars() {
+        try {
+            carManager.clearAllCars();
+            notifyListeners("LOAD", new ArrayList<>());
+        } catch (Exception e) {
+            notifyListeners("ERROR", "Error clearing cars: " + e.getMessage());
+        }
     }
 }

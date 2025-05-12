@@ -2,7 +2,7 @@ package CarPackage;
 
 import javax.swing.*;
 
-public class CarUI {
+public class AddCarUI {
     JPanel panel1;
     private JTextPane Title;
     private JTextPane ID;
