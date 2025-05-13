@@ -1,5 +1,6 @@
 package CustomerPackage;
 
+import SalesmanPackage.Salesman;
 import UserPackage.*;
 
 import java.util.*;
@@ -29,6 +30,7 @@ public class CustomerManagement {
         sendRegistrationEmail(customer);
         return true;
     }
+
 
     public boolean updateProfile(String username, String phoneNumber, String address) {
         Customer customer = customers.get(username);

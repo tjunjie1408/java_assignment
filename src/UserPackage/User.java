@@ -1,5 +1,9 @@
 package UserPackage;
 
+import CustomerPackage.Customer;
+import ManagerPackage.Manager;
+import SalesmanPackage.Salesman;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -58,15 +62,11 @@ public abstract class User {
     public static User fromCSV(String csv) {
         String[] parts = csv.split(",");
         UserRole role = UserRole.valueOf(parts[5]);
-        switch (role) {
-            case MANAGER:
-                return Manager.fromCSV(csv);
-            case SALESMAN:
-                return Salesman.fromCSV(csv);
-            case CUSTOMER:
-                return CustomerPackage.fromCSV(csv);
-            default:
-                throw new IllegalArgumentException("Invalid role: " + role);
-        }
+        return switch (role) {
+            case MANAGER -> Manager.fromCSV(csv);
+            case SALESMAN -> Salesman.fromCSV(csv);
+            case CUSTOMER -> Customer.fromCSV(csv);
+            default -> throw new IllegalArgumentException("Invalid role: " + role);
+        };
     }
 }
