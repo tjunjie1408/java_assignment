@@ -13,8 +13,8 @@ public class Salesman extends User {
     private String phoneNumber;
     private String address;
 
-    public Salesman(String id, String username, String password, String email) {
-        super(id, username, password, email, UserRole.SALESMAN);
+    public Salesman(String id, String username, String password, String email, String phoneNumber) {
+        super(id, username, password, email, phoneNumber, UserRole.SALESMAN);
         this.salesId = "S" + id;
         this.totalSales = 0;
         this.commissionRate = 0.05; // 5% default commission
@@ -46,7 +46,7 @@ public class Salesman extends User {
 
     public static Salesman fromCSV(String csv) {
         String[] parts = csv.split(",");
-        Salesman salesman = new Salesman(parts[0], parts[1], parts[2], parts[3]);
+        Salesman salesman = new Salesman(parts[0], parts[1], parts[2], parts[3], parts[4]);
         salesman.salesId = parts[6];
         salesman.totalSales = Integer.parseInt(parts[7]);
         salesman.commissionRate = Double.parseDouble(parts[8]);

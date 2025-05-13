@@ -1,45 +1,56 @@
 package CustomerPackage;
 
-import SalesmanPackage.Salesman;
 import UserPackage.*;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.io.*;
 import java.util.stream.Collectors;
 
 public class CustomerManagement {
-    private HashMap<String, Customer> customers;
-    private List<UserActivity> activityLog;
+    private final HashMap<String, Customer> customers = new HashMap<>();
+    private final List<UserActivity> activityLog = new ArrayList<>();
     private static final String CUSTOMERS_FILE = "customers.txt";
     private static final String ACTIVITY_LOG = "customer_activity.log";
 
     public CustomerManagement() {
-        customers = new HashMap<>();
-        activityLog = new ArrayList<>();
         loadCustomers();
     }
 
     // Registration and Profile Management
     public boolean registerCustomer(Customer customer) {
-        if (customers.containsKey(customer.getUsername())) {
-            return false;
-        }
-        customers.put(customer.getUsername(), customer);
-        logActivity(customer.getUsername(), "REGISTER", "New customer registration");
+        Objects.requireNonNull(customer);
+        String usr = customer.getUsername();
+        if (customers.containsKey(usr)) return false;
+        customers.put(usr, customer);
+        logActivity(usr, "REGISTER", "New registration");
         saveCustomers();
-        sendRegistrationEmail(customer);
+        sendRegistrationEmail(customer, "Welcome to Car Sales System",
+                "Dear " + usr + ", your account is pending approval.");
         return true;
     }
-
+    private String sha256(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("The SHA-256 algorithm does not exist!", e);
+        }
+    }
 
     public boolean updateProfile(String username, String phoneNumber, String address) {
-        Customer customer = customers.get(username);
-        if (customer == null) {
-            return false;
-        }
-        customer.setPhoneNumber(phoneNumber);
-        customer.setAddress(address);
-        logActivity(username, "PROFILE_UPDATE", "Profile information updated");
+        Customer c = customers.get(username);
+        if (c == null) return false;
+        c.setPhoneNumber(phoneNumber);
+        c.setAddress(address);
+        logActivity(username, "UPDATE_PROFILE", "Profile updated");
         saveCustomers();
         return true;
     }
@@ -118,7 +129,7 @@ public class CustomerManagement {
     }
 
     // Email Notifications
-    private void sendRegistrationEmail(Customer customer) {
+    private void sendRegistrationEmail(Customer customer, String welcomeToCarSalesSystem, String s) {
         // Simulate sending registration email
         System.out.println("Sending registration email to: " + customer.getEmail());
         System.out.println("Subject: Welcome to Car Sales System");

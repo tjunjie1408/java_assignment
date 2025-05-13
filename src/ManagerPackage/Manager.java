@@ -15,8 +15,8 @@ public class Manager extends User {
     private List<String> approvalHistory;
     private String accessLevel; // ADMIN, SENIOR, JUNIOR
 
-    public Manager(String id, String username, String password, String email) {
-        super(id, username, password, email, UserRole.MANAGER);
+    public Manager(String id, String username, String password, String email, String phoneNumber) {
+        super(id, username, password, email, phoneNumber, UserRole.MANAGER);
         this.managerId = "M" + id;
         this.managedSalesmen = new ArrayList<>();
         this.approvalHistory = new ArrayList<>();
@@ -53,7 +53,7 @@ public class Manager extends User {
 
     public static Manager fromCSV(String csv) {
         String[] parts = csv.split(",");
-        Manager manager = new Manager(parts[0], parts[1], parts[2], parts[3]);
+        Manager manager = new Manager(parts[0], parts[1], parts[2], parts[3], parts[4]);
         manager.managerId = parts[6];
         manager.department = parts[7];
         manager.position = parts[8];

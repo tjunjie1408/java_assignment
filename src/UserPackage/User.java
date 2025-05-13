@@ -13,16 +13,18 @@ public abstract class User {
     protected String username;
     protected String password;
     protected String email;
+    protected String phoneNumber;
     protected UserStatus status;
     protected UserRole role;
     protected LocalDateTime lastLogin;
     protected LocalDateTime createdAt;
 
-    public User(String id, String username, String password, String email, UserRole role) {
+    public User(String id, String username, String password, String email, String phoneNumber, UserRole role) {
         this.id = id;
         this.username = username;
         this.password = hashPassword(password);
         this.email = email;
+        this.phoneNumber = phoneNumber;
         this.role = role;
         this.status = UserStatus.PENDING;
         this.createdAt = LocalDateTime.now();
