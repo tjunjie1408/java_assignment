@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="CustomerPackage.CustomerMain">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="CustomerPackage.CustomerProfile">
   <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
@@ -8,7 +8,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="9abf6" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="1a077" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -16,36 +16,52 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="bd354" class="javax.swing.JLabel" binding="CustomerLoginTitle">
+          <component id="4d76c" class="javax.swing.JLabel" binding="Profile">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Customer Main Page"/>
+              <text value="Customer Profile"/>
             </properties>
           </component>
-          <component id="68589" class="javax.swing.JButton" binding="Register">
+          <component id="c995d" class="javax.swing.JButton" binding="EditProfile">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Register "/>
+              <text value="edit profile"/>
             </properties>
           </component>
-          <component id="42fe" class="javax.swing.JButton" binding="Login">
+          <component id="e410d" class="javax.swing.JButton" binding="ViewAvailableCar">
             <constraints>
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Login"/>
+              <text value="view details of available cars"/>
             </properties>
           </component>
-          <component id="8a8f9" class="javax.swing.JButton" binding="Exit">
+          <component id="faa3e" class="javax.swing.JButton" binding="GiveFeedbackAndRatings">
             <constraints>
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Exit"/>
+              <text value=" feedback and ratings"/>
+            </properties>
+          </component>
+          <component id="fca87" class="javax.swing.JButton" binding="ViewPurchaseHistories">
+            <constraints>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="View purchase history"/>
+            </properties>
+          </component>
+          <component id="5085c" class="javax.swing.JButton" binding="Logout">
+            <constraints>
+              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Logout"/>
             </properties>
           </component>
         </children>

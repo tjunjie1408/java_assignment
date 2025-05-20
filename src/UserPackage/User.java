@@ -19,10 +19,9 @@ public abstract class User {
     protected LocalDateTime lastLogin;
     protected LocalDateTime createdAt;
 
-    public User(String id, String username, String password, String email, String phoneNumber, UserRole role) {
-        this.id = id;
+    public User(String username, String password, String email, String phoneNumber, UserRole role) {
         this.username = username;
-        this.password = hashPassword(password);
+        this.password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.role = role;
@@ -30,27 +29,18 @@ public abstract class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    protected String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
-    }
 
     // Getters and setters
     public String getId() { return id; }
+    public void setId(String id) { this.id = id;}
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getEmail() { return email; }
+    public void setEmail(String email) {
+        this.email = email != null ? email : "";
+    }
     public UserStatus getStatus() { return status; }
     public UserRole getRole() { return role; }
     public LocalDateTime getLastLogin() { return lastLogin; }

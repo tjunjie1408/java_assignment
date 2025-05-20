@@ -1,5 +1,8 @@
 package UIPackage;
 
+import CustomerPackage.CustomerMain;
+import ManagerPackage.ManagerLogin;
+
 import javax.swing.*;
 
 public class LoginPage extends JFrame{
@@ -18,7 +21,7 @@ public class LoginPage extends JFrame{
         setLocationRelativeTo(null);
         setVisible(true);
         CustomerChoice.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null, "Customer Login");
+            JOptionPane.showMessageDialog(null, "Customer Main Page");
             new CustomerMain();
             this.dispose();
         });
@@ -26,9 +29,12 @@ public class LoginPage extends JFrame{
 
         });
         ManagerChoice.addActionListener(e -> {
-
+            JOptionPane.showMessageDialog(null, "Manager Main Page");
+            new ManagerLogin();
+            this.dispose();
         });
         Exit.addActionListener(e -> {
+            JOptionPane.showMessageDialog(null, "Thank you for using our system");
             System.exit(0);
         });
     }

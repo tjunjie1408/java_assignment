@@ -1,8 +1,8 @@
-package UIPackage;
+package CustomerPackage;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+import UIPackage.LoginPage;
 
 public class CustomerMain extends JFrame{
     private JPanel panel1;
@@ -12,6 +12,7 @@ public class CustomerMain extends JFrame{
     private JButton Exit;
 
     public CustomerMain() {
+        CustomerManagement cm = new CustomerManagement();
         setContentPane(panel1);
         setTitle(CustomerLoginTitle.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -20,14 +21,17 @@ public class CustomerMain extends JFrame{
         setVisible(true);
         Register.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Customer Register");
-            new CustomerRegister();
+            new CustomerRegister(cm);
             this.dispose();
         });
         Login.addActionListener(e -> {
-
+            JOptionPane.showMessageDialog(null, "Customer Login");
+            new CustomerLogin(cm);
+            this.dispose();
         });
         Exit.addActionListener(e -> {
-            System.exit(0);
+            JOptionPane.showMessageDialog(null, "Welcome to use our system again");
+            new LoginPage();
         });
     }
 }

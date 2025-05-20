@@ -2,174 +2,104 @@ package CustomerPackage;
 
 import UserPackage.*;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
 import java.io.*;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class CustomerManagement {
-    private final HashMap<String, Customer> customers = new HashMap<>();
-    private final List<UserActivity> activityLog = new ArrayList<>();
     private static final String CUSTOMERS_FILE = "customers.txt";
     private static final String ACTIVITY_LOG = "customer_activity.log";
+    private static final int ID_START = 1;
+    private final List<Customer> customers = new ArrayList<>();
 
     public CustomerManagement() {
         loadCustomers();
     }
 
-    // Registration and Profile Management
-    public boolean registerCustomer(Customer customer) {
-        Objects.requireNonNull(customer);
-        String usr = customer.getUsername();
-        if (customers.containsKey(usr)) return false;
-        customers.put(usr, customer);
-        logActivity(usr, "REGISTER", "New registration");
-        saveCustomers();
-        sendRegistrationEmail(customer, "Welcome to Car Sales System",
-                "Dear " + usr + ", your account is pending approval.");
-        return true;
+    // Register new customer: ensure unique username, email, phone
+    public void registerCustomer(Customer c) {
+        for (Customer ex : customers) {
+            if (ex.getUsername().equals(c.getUsername()))
+                throw new IllegalArgumentException("Username exists");
+            if (ex.getEmail().equalsIgnoreCase(c.getEmail()))
+                throw new IllegalArgumentException("Email exists");
+            if (!c.getPhoneNumber().isEmpty() && ex.getPhoneNumber().equals(c.getPhoneNumber()))
+                throw new IllegalArgumentException("Phone exists");
+        }
+        c.setId(String.valueOf(ID_START + customers.size()));
+        c.setStatus(UserStatus.PENDING);
+        customers.add(c);
+        saveAll();
+        log("REGISTER", c.getUsername());
     }
-    private String sha256(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
+
+    public void approveCustomer(String username) {
+        Customer c = find(username);
+        c.setStatus(UserStatus.APPROVED);
+        saveAll();
+        log("APPROVE", username);
+    }
+
+    public void rejectCustomer(String username) {
+        Customer c = find(username);
+        c.setStatus(UserStatus.REJECTED);
+        saveAll();
+        log("REJECT", username);
+    }
+
+    public void updateProfile(String username, String phone, String email) {
+        Customer c = find(username);
+        c.setPhoneNumber(phone);
+        c.setEmail(email)  ;
+        saveAll();
+        log("UPDATE", username);
+    }
+
+    public Customer login(String username, String password) {
+        for (Customer c : customers) {
+            if (c.getUsername().equals(username) && c.getPassword().equals(password)) {
+                if (c.getStatus() == UserStatus.APPROVED) {
+                    return c;
+                } else {
+                    throw new IllegalStateException("Account not yet approved");
+                }
             }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("The SHA-256 algorithm does not exist!", e);
         }
+        throw new NoSuchElementException("Invalid username or password");
     }
 
-    public boolean updateProfile(String username, String phoneNumber, String address) {
-        Customer c = customers.get(username);
-        if (c == null) return false;
-        c.setPhoneNumber(phoneNumber);
-        c.setAddress(address);
-        logActivity(username, "UPDATE_PROFILE", "Profile updated");
-        saveCustomers();
-        return true;
+    private Customer find(String username) {
+        return customers.stream()
+                .filter(c -> c.getUsername().equals(username))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No such user: " + username));
     }
 
-    // Approval Workflow
-    public boolean approveCustomer(String username) {
-        Customer customer = customers.get(username);
-        if (customer == null) {
-            return false;
-        }
-        customer.setStatus(UserStatus.APPROVED);
-        logActivity(username, "APPROVE", "Customer account approved");
-        saveCustomers();
-        sendApprovalEmail(customer);
-        return true;
+    private void saveAll() {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(CUSTOMERS_FILE))) {
+            for (Customer c : customers) {
+                w.write(c.toCSV());
+                w.newLine();
+            }
+        } catch (IOException e) { throw new UncheckedIOException("Failed to save customers", e); }
     }
 
-    public boolean rejectCustomer(String username) {
-        Customer customer = customers.get(username);
-        if (customer == null) {
-            return false;
-        }
-        customer.setStatus(UserStatus.REJECTED);
-        logActivity(username, "REJECT", "Customer account rejected");
-        saveCustomers();
-        sendRejectionEmail(customer);
-        return true;
-    }
-
-    // Purchase History
-    public boolean addPurchase(String username, String purchaseId) {
-        Customer customer = customers.get(username);
-        if (customer == null) {
-            return false;
-        }
-        customer.addPurchase(purchaseId);
-        logActivity(username, "PURCHASE", "New purchase added: " + purchaseId);
-        saveCustomers();
-        return true;
-    }
-
-    // File Operations
     private void loadCustomers() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(CUSTOMERS_FILE))) {
+        File f = new File(CUSTOMERS_FILE);
+        if (!f.exists()) return;
+        try (BufferedReader r = new BufferedReader(new FileReader(f))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                Customer customer = Customer.fromCSV(line);
-                customers.put(customer.getUsername(), customer);
+            while ((line = r.readLine()) != null) {
+                if (line.isEmpty()) continue;
+                customers.add(Customer.fromCSV(line));
             }
-        } catch (IOException e) {
-            System.out.println("Error loading customers: " + e.getMessage());
-        }
+        } catch (IOException e) { throw new UncheckedIOException("Failed to load customers", e);}
     }
 
-    private void saveCustomers() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CUSTOMERS_FILE))) {
-            for (Customer customer : customers.values()) {
-                writer.write(customer.toCSV());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving customers: " + e.getMessage());
-        }
-    }
-
-    // Activity Logging
-    private void logActivity(String username, String action, String details) {
-        UserActivity activity = new UserActivity(username, action, details);
-        activityLog.add(activity);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ACTIVITY_LOG, true))) {
-            writer.write(activity.toString());
-            writer.newLine();
-        } catch (IOException e) {
-            System.out.println("Error logging activity: " + e.getMessage());
-        }
-    }
-
-    // Email Notifications
-    private void sendRegistrationEmail(Customer customer, String welcomeToCarSalesSystem, String s) {
-        // Simulate sending registration email
-        System.out.println("Sending registration email to: " + customer.getEmail());
-        System.out.println("Subject: Welcome to Car Sales System");
-        System.out.println("Body: Dear " + customer.getUsername() +
-                ", thank you for registering. Your account is pending approval.");
-    }
-
-    private void sendApprovalEmail(Customer customer) {
-        // Simulate sending approval email
-        System.out.println("Sending approval email to: " + customer.getEmail());
-        System.out.println("Subject: Your Account Has Been Approved");
-        System.out.println("Body: Dear " + customer.getUsername() +
-                ", your account has been approved. You can now log in.");
-    }
-
-    private void sendRejectionEmail(Customer customer) {
-        // Simulate sending rejection email
-        System.out.println("Sending rejection email to: " + customer.getEmail());
-        System.out.println("Subject: Account Registration Status");
-        System.out.println("Body: Dear " + customer.getUsername() +
-                ", we regret to inform you that your account registration has been rejected.");
-    }
-
-    // Search Operations
-    public List<Customer> searchByStatus(UserStatus status) {
-        return customers.values().stream()
-                .filter(c -> c.getStatus() == status)
-                .collect(Collectors.toList());
-    }
-
-    public List<Customer> searchByMembershipLevel(String level) {
-        return customers.values().stream()
-                .filter(c -> c.getMembershipLevel().equals(level))
-                .collect(Collectors.toList());
-    }
-
-    // Activity History
-    public List<UserActivity> getActivityHistory(String username) {
-        return activityLog.stream()
-                .filter(a -> a.getUsername().equals(username))
-                .collect(Collectors.toList());
+    private void log(String action, String user) {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(ACTIVITY_LOG, true))) {
+            w.write(user + "," + action + "," + new Date().getTime());
+            w.newLine();
+        } catch (IOException e) { /* ignore */ }
     }
 }
+

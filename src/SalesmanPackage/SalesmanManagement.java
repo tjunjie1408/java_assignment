@@ -2,60 +2,69 @@ package SalesmanPackage;
 
 import UserPackage.*;
 
-import java.util.*;
 import java.io.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SalesmanManagement {
-    private HashMap<String, Salesman> salesmen;
+    private List<Salesman> salesmen;
     private List<UserActivity> activityLog;
     private static final String SALESMEN_FILE = "salesmen.txt";
     private static final String ACTIVITY_LOG = "salesman_activity.log";
 
     public SalesmanManagement() {
-        salesmen = new HashMap<>();
+        salesmen = new ArrayList<>();
         activityLog = new ArrayList<>();
         loadSalesmen();
     }
 
-    // CRUD Operations
     public boolean addSalesman(Salesman salesman) {
-        if (salesmen.containsKey(salesman.getUsername())) {
-            return false;
+        for (Salesman s : salesmen) {
+            if (s.getUsername().equals(salesman.getUsername())) {
+                return false;
+            }
         }
-        salesmen.put(salesman.getUsername(), salesman);
+        salesmen.add(salesman);
         logActivity(salesman.getUsername(), "ADD", "New salesman added");
         saveSalesmen();
         return true;
     }
 
     public Salesman getSalesman(String username) {
-        return salesmen.get(username);
+        for (Salesman s : salesmen) {
+            if (s.getUsername().equals(username)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public boolean updateSalesman(String username, Salesman updatedSalesman) {
-        if (!salesmen.containsKey(username)) {
-            return false;
+        for (int i = 0; i < salesmen.size(); i++) {
+            if (salesmen.get(i).getUsername().equals(username)) {
+                salesmen.set(i, updatedSalesman);
+                logActivity(username, "UPDATE", "Salesman information updated");
+                saveSalesmen();
+                return true;
+            }
         }
-        salesmen.put(username, updatedSalesman);
-        logActivity(username, "UPDATE", "Salesman information updated");
-        saveSalesmen();
-        return true;
+        return false;
     }
 
     public boolean deleteSalesman(String username) {
-        if (!salesmen.containsKey(username)) {
-            return false;
+        for (int i = 0; i < salesmen.size(); i++) {
+            if (salesmen.get(i).getUsername().equals(username)) {
+                salesmen.remove(i);
+                logActivity(username, "DELETE", "Salesman deleted");
+                saveSalesmen();
+                return true;
+            }
         }
-        salesmen.remove(username);
-        logActivity(username, "DELETE", "Salesman deleted");
-        saveSalesmen();
-        return true;
+        return false;
     }
 
-    // Profile Management
     public boolean updateProfile(String username, String phoneNumber, String address) {
-        Salesman salesman = salesmen.get(username);
+        Salesman salesman = getSalesman(username);
         if (salesman == null) {
             return false;
         }
@@ -66,9 +75,8 @@ public class SalesmanManagement {
         return true;
     }
 
-    // Sales Management
     public boolean addSale(String username, String saleId) {
-        Salesman salesman = salesmen.get(username);
+        Salesman salesman = getSalesman(username);
         if (salesman == null) {
             return false;
         }
@@ -79,13 +87,12 @@ public class SalesmanManagement {
         return true;
     }
 
-    // File Operations
     private void loadSalesmen() {
         try (BufferedReader reader = new BufferedReader(new FileReader(SALESMEN_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 Salesman salesman = Salesman.fromCSV(line);
-                salesmen.put(salesman.getUsername(), salesman);
+                salesmen.add(salesman);
             }
         } catch (IOException e) {
             System.out.println("Error loading salesmen: " + e.getMessage());
@@ -94,7 +101,7 @@ public class SalesmanManagement {
 
     private void saveSalesmen() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(SALESMEN_FILE))) {
-            for (Salesman salesman : salesmen.values()) {
+            for (Salesman salesman : salesmen) {
                 writer.write(salesman.toCSV());
                 writer.newLine();
             }
@@ -103,7 +110,6 @@ public class SalesmanManagement {
         }
     }
 
-    // Activity Logging
     private void logActivity(String username, String action, String details) {
         UserActivity activity = new UserActivity(username, action, details);
         activityLog.add(activity);
@@ -115,23 +121,33 @@ public class SalesmanManagement {
         }
     }
 
-    // Search Operations
     public List<Salesman> searchByManager(String managerId) {
-        return salesmen.values().stream()
-                .filter(s -> s.getManagerId().equals(managerId))
-                .collect(Collectors.toList());
+        List<Salesman> result = new ArrayList<>();
+        for (Salesman s : salesmen) {
+            if (s.getManagerId().equals(managerId)) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 
     public List<Salesman> searchBySalesRange(int minSales, int maxSales) {
-        return salesmen.values().stream()
-                .filter(s -> s.getTotalSales() >= minSales && s.getTotalSales() <= maxSales)
-                .collect(Collectors.toList());
+        List<Salesman> result = new ArrayList<>();
+        for (Salesman s : salesmen) {
+            if (s.getTotalSales() >= minSales && s.getTotalSales() <= maxSales) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 
-    // Activity History
     public List<UserActivity> getActivityHistory(String username) {
-        return activityLog.stream()
-                .filter(a -> a.getUsername().equals(username))
-                .collect(Collectors.toList());
+        List<UserActivity> result = new ArrayList<>();
+        for (UserActivity a : activityLog) {
+            if (a.getUsername().equals(username)) {
+                result.add(a);
+            }
+        }
+        return result;
     }
 }

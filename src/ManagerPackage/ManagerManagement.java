@@ -7,55 +7,89 @@ import java.io.*;
 import java.util.stream.Collectors;
 
 public class ManagerManagement {
-    private HashMap<String, Manager> managers;
+    private List<Manager> managers;
     private List<UserActivity> activityLog;
     private static final String MANAGERS_FILE = "managers.txt";
     private static final String ACTIVITY_LOG = "manager_activity.log";
+    private static ManagerManagement instance;
 
-    public ManagerManagement() {
-        managers = new HashMap<>();
+    private ManagerManagement() {
+        managers = new ArrayList<>();
         activityLog = new ArrayList<>();
         loadManagers();
     }
 
+    public static ManagerManagement getInstance() {
+        if (instance == null) {
+            instance = new ManagerManagement();
+        }
+        return instance;
+    }
+
     // CRUD Operations
     public boolean addManager(Manager manager) {
-        if (managers.containsKey(manager.getUsername())) {
-            return false;
+        for (Manager m : managers) {
+            if (m.getUsername().equals(manager.getUsername())) {
+                return false;
+            }
         }
-        managers.put(manager.getUsername(), manager);
-        logActivity(manager.getUsername(), "ADD", "New manager added");
+
+        int maxId = 0;
+        for (Manager m : managers) {
+            try {
+                int currentId = Integer.parseInt(m.getId());
+                if (currentId > maxId) {
+                    maxId = currentId;
+                }
+            } catch (NumberFormatException e) {
+                // Ignore non-numeric IDs
+            }
+        }
+        String newId = String.valueOf(maxId + 1);
+        manager.setId(newId);
+
+        managers.add(manager);
+        logActivity(manager.getUsername(), "ADD", "New manager added with id: " + newId);
         saveManagers();
         return true;
     }
 
     public Manager getManager(String username) {
-        return managers.get(username);
+        for (Manager m : managers) {
+            if (m.getUsername().equals(username)) {
+                return m;
+            }
+        }
+        return null;
     }
 
     public boolean updateManager(String username, Manager updatedManager) {
-        if (!managers.containsKey(username)) {
-            return false;
+        for (int i = 0; i < managers.size(); i++) {
+            if (managers.get(i).getUsername().equals(username)) {
+                managers.set(i, updatedManager);
+                logActivity(username, "UPDATE", "Manager information updated");
+                saveManagers();
+                return true;
+            }
         }
-        managers.put(username, updatedManager);
-        logActivity(username, "UPDATE", "Manager information updated");
-        saveManagers();
-        return true;
+        return false;
     }
 
     public boolean deleteManager(String username) {
-        if (!managers.containsKey(username)) {
-            return false;
+        for (int i = 0; i < managers.size(); i++) {
+            if (managers.get(i).getUsername().equals(username)) {
+                managers.remove(i);
+                logActivity(username, "DELETE", "Manager deleted");
+                saveManagers();
+                return true;
+            }
         }
-        managers.remove(username);
-        logActivity(username, "DELETE", "Manager deleted");
-        saveManagers();
-        return true;
+        return false;
     }
 
     // Profile Management
     public boolean updateProfile(String username, String phoneNumber, String officeLocation) {
-        Manager manager = managers.get(username);
+        Manager manager = getManager(username);
         if (manager == null) {
             return false;
         }
@@ -68,7 +102,7 @@ public class ManagerManagement {
 
     // Salesman Management
     public boolean assignSalesman(String managerUsername, String salesmanId) {
-        Manager manager = managers.get(managerUsername);
+        Manager manager = getManager(managerUsername);
         if (manager == null) {
             return false;
         }
@@ -79,7 +113,7 @@ public class ManagerManagement {
     }
 
     public boolean removeSalesman(String managerUsername, String salesmanId) {
-        Manager manager = managers.get(managerUsername);
+        Manager manager = getManager(managerUsername);
         if (manager == null) {
             return false;
         }
@@ -91,7 +125,7 @@ public class ManagerManagement {
 
     // Approval Management
     public boolean addApproval(String username, String approvalId) {
-        Manager manager = managers.get(username);
+        Manager manager = getManager(username);
         if (manager == null) {
             return false;
         }
@@ -107,7 +141,7 @@ public class ManagerManagement {
             String line;
             while ((line = reader.readLine()) != null) {
                 Manager manager = Manager.fromCSV(line);
-                managers.put(manager.getUsername(), manager);
+                managers.add(manager);
             }
         } catch (IOException e) {
             System.out.println("Error loading managers: " + e.getMessage());
@@ -115,13 +149,15 @@ public class ManagerManagement {
     }
 
     private void saveManagers() {
+        System.out.println("Saving managers to " + MANAGERS_FILE);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(MANAGERS_FILE))) {
-            for (Manager manager : managers.values()) {
+            for (Manager manager : managers) {
+                System.out.println("Writing manager: " + manager.toCSV());
                 writer.write(manager.toCSV());
                 writer.newLine();
             }
         } catch (IOException e) {
-            System.out.println("Error saving managers: " + e.getMessage());
+            System.err.println("Error saving managers: " + e.getMessage());
         }
     }
 
@@ -139,28 +175,44 @@ public class ManagerManagement {
 
     // Search Operations
     public List<Manager> searchByDepartment(String department) {
-        return managers.values().stream()
-                .filter(m -> m.getDepartment().equals(department))
-                .collect(Collectors.toList());
+        List<Manager> result = new ArrayList<>();
+        for (Manager m : managers) {
+            if (m.getDepartment().equals(department)) {
+                result.add(m);
+            }
+        }
+        return result;
     }
 
     public List<Manager> searchByPosition(String position) {
-        return managers.values().stream()
-                .filter(m -> m.getPosition().equals(position))
-                .collect(Collectors.toList());
+        List<Manager> result = new ArrayList<>();
+        for (Manager m : managers) {
+            if (m.getPosition().equals(position)) {
+                result.add(m);
+            }
+        }
+        return result;
     }
 
     public List<Manager> searchByAccessLevel(String accessLevel) {
-        return managers.values().stream()
-                .filter(m -> m.getAccessLevel().equals(accessLevel))
-                .collect(Collectors.toList());
+        List<Manager> result = new ArrayList<>();
+        for (Manager m : managers) {
+            if (m.getAccessLevel().equals(accessLevel)) {
+                result.add(m);
+            }
+        }
+        return result;
     }
 
     // Activity History
     public List<UserActivity> getActivityHistory(String username) {
-        return activityLog.stream()
-                .filter(a -> a.getUsername().equals(username))
-                .collect(Collectors.toList());
+        List<UserActivity> result = new ArrayList<>();
+        for (UserActivity a : activityLog) {
+            if (a.getUsername().equals(username)) {
+                result.add(a);
+            }
+        }
+        return result;
     }
 
     // Import/Export
@@ -169,7 +221,7 @@ public class ManagerManagement {
             String line;
             while ((line = reader.readLine()) != null) {
                 Manager manager = Manager.fromCSV(line);
-                managers.put(manager.getUsername(), manager);
+                managers.add(manager);
             }
             saveManagers();
             return true;
@@ -181,7 +233,7 @@ public class ManagerManagement {
 
     public boolean exportManagers(String filename) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            for (Manager manager : managers.values()) {
+            for (Manager manager : managers) {
                 writer.write(manager.toCSV());
                 writer.newLine();
             }

@@ -14,11 +14,12 @@ public class Salesman extends User {
     private String address;
 
     public Salesman(String id, String username, String password, String email, String phoneNumber) {
-        super(id, username, password, email, phoneNumber, UserRole.SALESMAN);
+        super(id, username, password, email, UserRole.SALESMAN);
         this.salesId = "S" + id;
         this.totalSales = 0;
-        this.commissionRate = 0.05; // 5% default commission
+        this.commissionRate = 0.05;
         this.salesHistory = new ArrayList<>();
+        this.phoneNumber = phoneNumber;
     }
 
     // Getters and setters
