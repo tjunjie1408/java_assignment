@@ -61,8 +61,8 @@ public class CustomerRegister extends JFrame {
                 customerManagement.registerCustomer(newCustomer);
                 String id = newCustomer.getCustomerId();
                 JOptionPane.showMessageDialog(this, "Registration successful! Your ID: " + id, "Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-                new CustomerProfile(customerManagement);
+                this.dispose();
+                new CustomerMain();
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Failed", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {

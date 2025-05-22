@@ -1,1 +1,2 @@
-1,Jason,79880,jasonteo1408@gmail.com,APPROVED,CUSTOMER,6169392308,null,null
+1,Jason,79880,jasonteo1408@gmail.com,6169392308,APPROVED
+2,Vera,60406,vera0406@gmail.com,611223334,APPROVED

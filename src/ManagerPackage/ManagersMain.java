@@ -26,6 +26,8 @@ public class ManagersMain extends JFrame{
         });
         manageSalesmanProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Salesman Profile clicked");
+            new ManagerManageSalesman();
+            this.dispose();
         });
         manageCustomerProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Customer Profile clicked");

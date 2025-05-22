@@ -1,7 +1,5 @@
 package SalesmanPackage;
-
 import UserPackage.*;
-
 import java.util.*;
 
 public class Salesman extends User {
@@ -40,23 +38,16 @@ public class Salesman extends User {
     @Override
     public String toCSV() {
         return String.join(",",
-                id, username, password, email, status.toString(), role.toString(),
-                salesId, String.valueOf(totalSales), String.valueOf(commissionRate),
-                managerId, phoneNumber, address, String.join(";", salesHistory));
+                id, username, password, email, phoneNumber, status.toString());
     }
 
     public static Salesman fromCSV(String csv) {
         String[] parts = csv.split(",");
-        Salesman salesman = new Salesman(parts[0], parts[1], parts[2], parts[3], parts[4]);
-        salesman.salesId = parts[6];
-        salesman.totalSales = Integer.parseInt(parts[7]);
-        salesman.commissionRate = Double.parseDouble(parts[8]);
-        salesman.managerId = parts[9];
-        salesman.phoneNumber = parts[10];
-        salesman.address = parts[11];
-        if (parts.length > 12) {
-            salesman.salesHistory = Arrays.asList(parts[12].split(";"));
+        if (parts.length < 6) {
+            throw new IllegalArgumentException("Invalid CSV format for Salesman");
         }
+        Salesman salesman = new Salesman(parts[0], parts[1], parts[2], parts[3], parts[4]);
+        salesman.setStatus(UserStatus.valueOf(parts[5]));
         return salesman;
     }
 }

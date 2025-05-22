@@ -50,7 +50,7 @@ public class CustomerLogin extends JFrame{
                     JOptionPane.showMessageDialog(this,
                             "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
-                    new CustomerMain();
+                    new CustomerProfile(customerManagement);
                 } else {
                     JOptionPane.showMessageDialog(this,
                             "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);

@@ -101,5 +101,33 @@ public class CustomerManagement {
             w.newLine();
         } catch (IOException e) { /* ignore */ }
     }
+    public Customer findById(String id) {
+        for (Customer c : customers) {
+            if (c.getId().equals(id)) {
+                return c;
+            }
+        }
+        throw new NoSuchElementException("No such customer: " + id);
+    }
+    public List<Customer> getCustomers() {
+        return new ArrayList<>(customers);
+    }
+    public void updateCustomer(Customer updatedCustomer) {
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i).getId().equals(updatedCustomer.getId())) {
+                customers.set(i, updatedCustomer);
+                saveAll();
+                log("UPDATE", updatedCustomer.getUsername());
+                return;
+            }
+        }
+        throw new NoSuchElementException("No such customer: " + updatedCustomer.getId());
+    }
+    public void deleteCustomer(String customerId) {
+        Customer c = findById(customerId);
+        customers.remove(c);
+        saveAll();
+        log("DELETE", c.getUsername());
+    }
 }
 
