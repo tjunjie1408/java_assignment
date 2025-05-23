@@ -32,6 +32,7 @@ public class ManagerManageSalesman extends JFrame {
         salesmanManagement = new SalesmanManagement();
         String[] columnNames = {"Salesman ID", "Username", "Password", "Email", "Phone Number"};
         tableModel = new DefaultTableModel(columnNames, 0) ;
+        SalesmanTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         SalesmanTable.setModel(tableModel);
         loadSalesmanData();
         addButton.addActionListener(e -> addSalesman());

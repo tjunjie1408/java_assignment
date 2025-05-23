@@ -46,17 +46,16 @@ public class Car {
         return carId + "," + brand + "," + model + "," + color + "," + price + "," + photoPath + "," + status;
     }
 
-    public static Car fromCSV(String csv) {
-        String[] parts = csv.split(",");
-        return new Car(
-                parts[0], // carId
-                parts[1], // brand
-                parts[2], // model
-                parts[3], // color
-                Double.parseDouble(parts[4]), // price
-                parts[5], // photoPath
-                parts[6]  // status
-        );
+    public static Car fromCSV(String line) {
+        String[] parts = line.split(",");
+        String carId = parts[0];
+        String brand = parts[1];
+        String model = parts[2];
+        String color = parts[3];
+        double price = Double.parseDouble(parts[4]);
+        String photoPath = parts[5];
+        String status = parts[6];
+        return new Car(carId, brand, model, color, price, photoPath, status);
     }
 
     @Override

@@ -11,6 +11,9 @@ public class CarManagement {
         cars = new ArrayList<>();
         loadCars();
     }
+    public List<Car> getAllCars() {
+        return new ArrayList<>(cars);
+    }
 
     public boolean addCar(Car car) {
         for (Car c : cars) {
@@ -33,10 +36,6 @@ public class CarManagement {
         }
         System.out.println("Error: car with ID " + carId + " was not found.");
         return null;
-    }
-
-    public List<Car> getAllCars() {
-        return new ArrayList<>(cars);
     }
 
     public boolean updateCar(String carId, Car newCar) {
@@ -111,48 +110,39 @@ public class CarManagement {
         return searchByStatus("available");
     }
 
-    private void loadCars() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(CARS_FILE))) {
+    public void loadCars() {
+        try (BufferedReader br = new BufferedReader(new FileReader("cars.txt"))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                try {
-                    Car car = Car.fromCSV(line);
-                    cars.add(car);
-                } catch (Exception e) {
-                    System.out.println("Error parsing car data:" + e.getMessage());
-                }
+            while ((line = br.readLine()) != null) {
+                Car car = Car.fromCSV(line); // 假设有一个 fromCSV 方法
+                cars.add(car);
             }
-            System.out.println("Car data loaded successfully.");
-        } catch (FileNotFoundException e) {
-            System.out.println("Car file not found, creating new file.");
-            createFile();
         } catch (IOException e) {
-            System.out.println("Error reading car file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // 保存汽车数据到文件
+
     private void saveCars() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CARS_FILE))) {
             for (Car car : cars) {
                 writer.write(car.toCSV());
                 writer.newLine();
             }
-            System.out.println("汽车数据保存成功。");
+            System.out.println("Car data saved successfully.");
         } catch (IOException e) {
-            System.out.println("保存汽车数据出错：" + e.getMessage());
+            System.out.println("Error saving car data: " + e.getMessage());
         }
     }
 
-    // 创建新文件
     private void createFile() {
         try {
             File file = new File(CARS_FILE);
             if (file.createNewFile()) {
-                System.out.println("已创建新的汽车文件。");
+                System.out.println("A new car file has been created.");
             }
         } catch (IOException e) {
-            System.out.println("创建汽车文件出错：" + e.getMessage());
+            System.out.println("Error creating car file: "+ e.getMessage());
         }
     }
 }

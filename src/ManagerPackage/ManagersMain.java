@@ -1,6 +1,7 @@
 package ManagerPackage;
 
 import UIPackage.LoginPage;
+import UIPackage.ManagerManageCars;
 
 import javax.swing.*;
 
@@ -36,6 +37,8 @@ public class ManagersMain extends JFrame{
         });
         manageCarDetailsButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Car Details clicked");
+            new ManagerManageCars();
+            this.dispose();
         });
         paymentAndFeedbackAnalysisButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Payment and Feedback Analysis clicked");
