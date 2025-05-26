@@ -1,1 +1,1 @@
-C01,Proton,Myvi,Blue,60000.0,CarsImage/Myvi-1.5_3_4_FRONT-LEFT-1024x768.jpg,BOOKED
+C01,Proton,Myvi,Blue,60000.0,CarsImage/Myvi-1.5_3_4_FRONT-LEFT-1024x768.jpg,PAID

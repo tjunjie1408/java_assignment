@@ -91,11 +91,13 @@ public class CustomerManagement {
         if (car == null || !"Available".equals(car.getStatus())) {
             throw new IllegalStateException("Car not available");
         }
+        Customer c = findById(customerId);
+        String username = c.getUsername();
         String orderId = UUID.randomUUID().toString();
-        Order order = new Order(orderId, customerId, carId, "PENDING", new Date());
+        Order order = new Order(orderId, username, carId, "PENDING", new Date());
         orders.add(order);
         saveOrders();
-        log("ORDER", customerId + ", order=" + orderId);
+        log("ORDER", username + ", order=" + orderId);
         return order;
     }
 
@@ -215,9 +217,9 @@ public class CustomerManagement {
         return new ArrayList<>(customers);
     }
 
-    public List<Order> listOrdersByCustomer(String customerId) {
+    public List<Order> listOrdersByCustomer(String username) {
         return orders.stream()
-                .filter(order -> order.getCustomerId().equals(customerId))
+                .filter(order -> order.getUsername().equals(username))
                 .collect(Collectors.toList());
     }
 
@@ -246,7 +248,7 @@ public class CustomerManagement {
 
     public List<Order> getCustomerOrders(String customerId) {
         return orders.stream()
-                .filter(order -> order.getCustomerId().equals(customerId))
+                .filter(order -> order.getUsername().equals(customerId))
                 .collect(Collectors.toList());
     }
 }

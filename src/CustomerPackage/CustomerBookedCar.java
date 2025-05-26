@@ -6,8 +6,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import CarPackage.*;
+import MainPackage.*;
 
 public class CustomerBookedCar extends JFrame {
     private JPanel panel1;
@@ -21,9 +21,14 @@ public class CustomerBookedCar extends JFrame {
     private DefaultTableModel tableModel;
     private CustomerManagement customerManagement;
     private String customerId;
+    private AppContext context;
 
-    public CustomerBookedCar(CustomerManagement customerManagement, String customerId) {
-        this.customerManagement = customerManagement;
+    public CustomerBookedCar(AppContext context, String customerId) {
+        if (context == null) {
+            throw new IllegalArgumentException("AppContext cannot be null");
+        }
+        this.customerManagement = context.getCustomerManagement();
+        this.context = context;
         this.customerId = customerId;
 
         setContentPane(panel1);
@@ -58,7 +63,7 @@ public class CustomerBookedCar extends JFrame {
             List<Order> customerOrders = customerManagement.listOrdersByCustomer(customerId);
             List<Order> payableOrders = customerOrders.stream()
                     .filter(o -> "CONFIRMED".equals(o.getStatus()))
-                    .collect(Collectors.toList());
+                    .toList();
             if (payableOrders.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No orders to pay!");
                 return;
@@ -83,7 +88,7 @@ public class CustomerBookedCar extends JFrame {
             List<Order> customerOrders = customerManagement.getCustomerOrders(customerId);
             List<Order> feedbackOrders = customerOrders.stream()
                     .filter(o -> "PAID".equals(o.getStatus()))
-                    .collect(Collectors.toList());
+                    .toList();
             if (feedbackOrders.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No orders to provide feedback for!");
                 return;
@@ -127,7 +132,7 @@ public class CustomerBookedCar extends JFrame {
 
     private void loadCarData() {
         tableModel.setRowCount(0);
-        List<Car> cars = customerManagement.carManagement.getAllCars();
+        List<Car> cars = context.getCarManagement().getAllCars();
         for (Car car : cars) {
             tableModel.addRow(new Object[]{
                     car.getCarId(), car.getBrand(), car.getModel(), car.getColor(),
@@ -139,7 +144,7 @@ public class CustomerBookedCar extends JFrame {
     private void searchCars() {
         String searchTerm = SearchTextField.getText().trim().toLowerCase();
         tableModel.setRowCount(0);
-        List<Car> cars = customerManagement.carManagement.getAllCars();
+        List<Car> cars = context.getCarManagement().getAllCars();
         for (Car car : cars) {
             if (car.getCarId().toLowerCase().contains(searchTerm) ||
                     car.getBrand().toLowerCase().contains(searchTerm) ||

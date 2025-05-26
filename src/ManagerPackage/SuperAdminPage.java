@@ -1,5 +1,7 @@
 package ManagerPackage;
 
+import MainPackage.AppContext;
+
 import javax.swing.*;
 
 public class SuperAdminPage extends JFrame{
@@ -15,8 +17,10 @@ public class SuperAdminPage extends JFrame{
     private JLabel Email;
     private JLabel Password;
     private JTextField PhoneNumberTextField;
+    private AppContext context;
 
-    public SuperAdminPage() {
+    public SuperAdminPage(AppContext context) {
+        this.context = context;
         setContentPane(panel1);
         setTitle(SuperAdminPage.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -25,7 +29,7 @@ public class SuperAdminPage extends JFrame{
         setVisible(true);
         exitButton.addActionListener( e ->{
             JOptionPane.showMessageDialog(null, "You are back to the main page");
-            new ManagerLogin();
+            new ManagerLogin(context);
             this.dispose();
         });
         addButton.addActionListener(e -> {
@@ -47,7 +51,7 @@ public class SuperAdminPage extends JFrame{
                 PasswordField.setText("");
                 EmailTextField.setText("");
                 PhoneNumberTextField.setText("");
-                new ManagerLogin();
+                new ManagerLogin(context);
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Username already exists", "Error", JOptionPane.ERROR_MESSAGE);

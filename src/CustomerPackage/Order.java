@@ -4,27 +4,27 @@ import java.util.Date;
 
 public class Order {
     private String orderId;
-    private String customerId;
+    private String username;
     private String carId;
     private String status;
     private Date orderDate;
 
-    public Order(String orderId, String customerId, String carId, String status, Date orderDate) {
+    public Order(String orderId, String username, String carId, String status, Date orderDate) {
         this.orderId = orderId;
-        this.customerId = customerId;
+        this.username = username;
         this.carId = carId;
         this.status = status;
         this.orderDate = orderDate;
     }
 
     public String getOrderId() { return orderId; }
-    public String getCustomerId() { return customerId; }
+    public String getUsername() { return username; }
     public String getCarId() { return carId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
     public String toCSV() {
-        return orderId + "," + customerId + "," + carId + "," + status + "," + orderDate.getTime();
+        return orderId + "," + username + "," + carId + "," + status + "," + orderDate.getTime();
     }
 
     public static Order fromCSV(String csv) {

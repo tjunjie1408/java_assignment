@@ -14,10 +14,12 @@ public class LoginPage extends JFrame{
     private JButton ManagerChoice;
     private JLabel LoginTitle;
     private JButton Exit;
-    private AppContext context = new AppContext();
+    private AppContext context;
     private String salesId;
+    private String customerId;
 
-    public LoginPage() {
+    public LoginPage(AppContext context) {
+        this.context = context;
         setContentPane(panel1);
         setTitle(LoginTitle.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -26,17 +28,17 @@ public class LoginPage extends JFrame{
         setVisible(true);
         CustomerChoice.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Customer Main Page");
-            new CustomerMain();
+            new CustomerMain(context);
             this.dispose();
         });
         SalesmanChoice.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Salesman Main Page");
-            new SalesmanLogin(context, salesId);
+            new SalesmanLogin(context);
             this.dispose();
         });
         ManagerChoice.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Manager Main Page");
-            new ManagerLogin();
+            new ManagerLogin(context);
             this.dispose();
         });
         Exit.addActionListener(e -> {
@@ -46,6 +48,7 @@ public class LoginPage extends JFrame{
     }
 
     public static void main(String[] args) {
-        new LoginPage();
+        AppContext appContext = new AppContext();
+        new LoginPage(appContext);
     }
 }

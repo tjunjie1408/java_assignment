@@ -1,5 +1,7 @@
 package CustomerPackage;
 
+import MainPackage.AppContext;
+
 import javax.swing.*;
 
 public class CustomerRegister extends JFrame {
@@ -14,11 +16,12 @@ public class CustomerRegister extends JFrame {
     private JFormattedTextField PhoneNumberFormattedTextField1;
     private JLabel PhoneNumber;
     private JPasswordField PasswordField;
+    private String customerId;
+    private AppContext context;
+    private CustomerManagement customerManagement;
 
-    private final CustomerManagement customerManagement;
-
-    public CustomerRegister(CustomerManagement cm) {
-        this.customerManagement = cm;
+    public CustomerRegister(AppContext context) {
+        this.context = context;
         initUI();
     }
 
@@ -33,7 +36,7 @@ public class CustomerRegister extends JFrame {
         assert Cancel != null;
         Cancel.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "You are back to the main page");
-            new CustomerMain();
+            new CustomerMain(context);
             this.dispose();
         });
         assert Submit != null;
@@ -62,7 +65,7 @@ public class CustomerRegister extends JFrame {
                 String id = newCustomer.getCustomerId();
                 JOptionPane.showMessageDialog(this, "Registration successful! Your ID: " + id, "Success", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
-                new CustomerMain();
+                new CustomerMain(context);
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Failed", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {

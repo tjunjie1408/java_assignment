@@ -38,7 +38,7 @@ public class SalesmanEditCar extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Model", "Color", "Price", "Photo Path", "Status"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Model", "Color", "Price", "Photo Path", "Status", "Order ID"}, 0);
         CarTable.setModel(tableModel);
         CarTable.setDefaultRenderer(Object.class, new CarTableCellRenderer());
         CarTable.setRowHeight(150);
@@ -69,22 +69,59 @@ public class SalesmanEditCar extends JFrame {
         });
 
         // Edit later
-        paymentServiceButton.addActionListener(e -> JOptionPane.showMessageDialog(SalesmanEditCar.this, "Payment service not implemented yet!"));
+        paymentServiceButton.addActionListener(e -> {
+            int selectedRow = CarTable.getSelectedRow();
+            if (selectedRow == -1) {
+                showMessage("Please select a car to collect payment for!");
+                return;
+            }
+            String orderId = (String) tableModel.getValueAt(selectedRow, 7);
+            if ("N/A".equals(orderId)) {
+                showMessage("No order associated with this car!");
+                return;
+            }
+            Order order = customerManagement.findOrder(orderId);
+            if (order == null) {
+                showMessage("Order not found!");
+                return;
+            }
+            if (!"CONFIRMED".equals(order.getStatus())) {
+                showMessage("Order is not in CONFIRMED status, cannot collect payment.");
+                return;
+            }
+            // Collect payment
+            double amount = carManagement.getCar(order.getCarId()).getPrice();
+            try {
+                Payment payment = customerManagement.makePayment(orderId, amount);
+                showMessage("Payment collected! Payment ID: " + payment.getPaymentId());
+                salesmanManagement.updateCarStatus(order.getCarId(), "PAID");
+                loadCarData();
+            } catch (IllegalStateException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
 
         salesRecordButton.addActionListener(e -> {
-            String orderId = JOptionPane.showInputDialog(SalesmanEditCar.this, "Enter Order ID to record sale:");
-            if (orderId != null && !orderId.trim().isEmpty()) {
-                Order order = customerManagement.findOrder(orderId);
-                if (order != null && "PAID".equals(order.getStatus())) {
-                    String comment = JOptionPane.showInputDialog(SalesmanEditCar.this, "Enter comment for the sale:");
-                    if (comment != null) {
-                        salesmanManagement.recordSale(orderId, salesmanId, comment);
-                        JOptionPane.showMessageDialog(SalesmanEditCar.this, "Sale recorded successfully!");
+            int selectedRow = CarTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String orderId = (String) tableModel.getValueAt(selectedRow, 7);
+                if (!"N/A".equals(orderId)) {
+                    Order order = customerManagement.findOrder(orderId);
+                    if (order != null && "PAID".equals(order.getStatus())) {
+                        String comment = JOptionPane.showInputDialog(SalesmanEditCar.this, "Enter comment for the sale:");
+                        if (comment != null) {
+                            salesmanManagement.recordSale(orderId, salesmanId, comment);
+                            JOptionPane.showMessageDialog(SalesmanEditCar.this, "Sale recorded successfully!");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(SalesmanEditCar.this, "Invalid order or order not paid!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(SalesmanEditCar.this, "Invalid order ID or order not paid!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(SalesmanEditCar.this, "No order associated with this car!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            } else {
+                JOptionPane.showMessageDialog(SalesmanEditCar.this, "Please select a car to record sale!");
             }
         });
 
@@ -112,9 +149,17 @@ public class SalesmanEditCar extends JFrame {
         for (Car car : cars) {
             tableModel.addRow(new Object[]{
                     car.getCarId(), car.getBrand(), car.getModel(), car.getColor(),
-                    car.getPrice(), car.getPhotoPath(), car.getStatus()
+                    car.getPrice(), car.getPhotoPath(), car.getStatus(), getOrderIdForCar(car.getCarId())
             });
         }
+    }
+
+    private String getOrderIdForCar(String carId) {
+        List<Order> orders = customerManagement.getOrdersByCarId(carId);
+        if (orders != null && !orders.isEmpty()) {
+            return orders.get(0).getOrderId();
+        }
+        return "N/A";
     }
 
     private void searchCars() {
@@ -133,5 +178,8 @@ public class SalesmanEditCar extends JFrame {
                 });
             }
         }
+    }
+    private void showMessage(String msg) {
+        JOptionPane.showMessageDialog(this, msg);
     }
 }

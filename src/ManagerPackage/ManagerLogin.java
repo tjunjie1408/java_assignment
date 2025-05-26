@@ -1,5 +1,6 @@
 package ManagerPackage;
 
+import MainPackage.AppContext;
 import MainPackage.LoginPage;
 
 import javax.swing.*;
@@ -14,8 +15,10 @@ public class ManagerLogin extends JFrame{
     private JButton cancelButton;
     private JButton loginButton;
     private JPasswordField PasswordField;
+    private AppContext context;
 
-    public ManagerLogin(){
+    public ManagerLogin(AppContext context){
+        this.context = context;
         setContentPane(panel1);
         setTitle(ManagerLoginPage.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -24,7 +27,7 @@ public class ManagerLogin extends JFrame{
         setVisible(true);
         cancelButton.addActionListener( e ->{
             JOptionPane.showMessageDialog(null, "You are back to the main page");
-            new LoginPage();
+            new LoginPage(context);
             this.dispose();
         });
         loginButton.addActionListener(e -> {
@@ -37,13 +40,13 @@ public class ManagerLogin extends JFrame{
             if (authenticate(username, password)) {
                 JOptionPane.showMessageDialog(this, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 try {
-                    new ManagersMain();
+                    new ManagersMain(context);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
                 this.dispose();
             }else if(username.equals("superadmin") && password.equals("admin123")){
-                new SuperAdminPage();
+                new SuperAdminPage(context);
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);

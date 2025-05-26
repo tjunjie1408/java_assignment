@@ -14,7 +14,6 @@ public class Customer extends User {
     public Customer(String username, String password, String email, String phoneNumber) {
         super(username, password, email, phoneNumber, UserRole.CUSTOMER);
         this.customerId = null;
-        // 初始化其他默认值
     }
 
     public Customer(String id, String username, String password, String email, String phoneNumber) {
@@ -46,6 +45,9 @@ public class Customer extends User {
             purchaseHistory.add(purchaseId);
         }
     }
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
 
     public String getPreferredPaymentMethod() {
         return preferredPaymentMethod;
@@ -70,35 +72,29 @@ public class Customer extends User {
                 getUsername(),
                 getPassword(),
                 getEmail(),
-                getStatus().name(),
-                getRole().name(),
                 getPhoneNumber(),
-                preferredPaymentMethod,
-                preferredContactMethod,
-                purchaseHistory.stream()
-                        .filter(Objects::nonNull)
-                        .map(s -> s.replace(";", "\\;"))
-                        .collect(Collectors.joining(";"))
+                getStatus().name(),
+                getRole().name()
         );
     }
 
     public static Customer fromCSV(String csv) {
-        String[] parts = csv.split(",", -1); // -1 保留所有空项
-        // parts: [0]=id, [1]=username, [2]=password, [3]=email,
-        //        [4]=phone, [5]=status, … （如果还有更多列）
-        Customer c = new Customer(
-                parts[0],              // id
-                parts[1],              // username
-                parts[2],              // password
-                parts[3],              // email
-                parts[4]               // phone number
-        );
-        // 现在把 status 从 parts[5] 读取
-        if (!parts[5].isBlank()) {
-            c.setStatus(UserStatus.valueOf(parts[5]));
+        String[] parts = csv.split(",", -1);
+        if (parts.length < 7) {
+            throw new IllegalArgumentException("Invalid customer CSV: " + csv);
         }
-        // 如果你后面又加了 preferredPaymentMethod、preferredContactMethod、purchaseHistory
-        // 就继续读取 parts[6], parts[7], parts[8]...
+        // parts: 0=id,1=user,2=pass,3=email,4=phone,5=status,6=role
+        Customer c = new Customer(
+                parts[0].trim(),
+                parts[1].trim(),
+                parts[2].trim(),
+                parts[3].trim(),
+                parts[4].trim()
+        );
+        String statusStr = parts[5].trim();
+        if (!statusStr.isEmpty()) c.setStatus(UserStatus.valueOf(statusStr));
+        String roleStr = parts[6].trim();
+        if (!roleStr.isEmpty()) c.setRole(UserRole.valueOf(roleStr));
         return c;
     }
 }

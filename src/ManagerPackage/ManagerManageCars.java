@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
 import CarPackage.*;
+import MainPackage.AppContext;
 
 public class ManagerManageCars extends JFrame {
     private JPanel panel1;
@@ -20,8 +21,10 @@ public class ManagerManageCars extends JFrame {
     private JButton exitButton;
     private DefaultTableModel tableModel;
     private CarManagement carManagement;
+    private AppContext context;
 
-    public ManagerManageCars() {
+    public ManagerManageCars(AppContext context) {
+        this.context = context;
         setContentPane(panel1);
         setTitle("Manage Cars");
         setSize(800, 600);
@@ -87,7 +90,7 @@ public class ManagerManageCars extends JFrame {
 
         // Exit Button
         exitButton.addActionListener(e -> {
-            new ManagersMain();
+            new ManagersMain(context);
             this.dispose();
         });
 

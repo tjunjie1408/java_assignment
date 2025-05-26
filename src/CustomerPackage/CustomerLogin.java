@@ -1,5 +1,7 @@
 package CustomerPackage;
 
+import MainPackage.AppContext;
+
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,9 +17,9 @@ public class CustomerLogin extends JFrame{
     private JLabel Password;
     private JPasswordField PasswordField;
     private String customerId;
-    private final CustomerManagement customerManagement;
-    public CustomerLogin(CustomerManagement cm, String customerId) {
-        this.customerManagement = cm;
+    private AppContext context;
+    public CustomerLogin(AppContext context, String customerId) {
+        this.context = context;
         this.customerId = customerId;
         initUI();
     }
@@ -34,7 +36,7 @@ public class CustomerLogin extends JFrame{
         Cancel.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "You are back to the main page");
             dispose();
-            new CustomerMain();
+            new CustomerMain(context);
         });
 
         assert Login != null;
@@ -46,23 +48,20 @@ public class CustomerLogin extends JFrame{
                         "Username and password cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            try {
-                if (checkLogin(username, password)) {
-                    JOptionPane.showMessageDialog(this,
-                            "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    dispose();
-                    new CustomerProfile(customerManagement, customerId);
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Username or password is incorrect");
+            String id = checkLogin(username, password);
+            if (id != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+                new CustomerProfile(context, id);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Invalid username or password",
+                        "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
-
         });
     }
-    public boolean checkLogin(String username, String password) {
+    public String checkLogin(String username, String password) {
         try (BufferedReader reader = new BufferedReader(new FileReader("customers.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -71,14 +70,15 @@ public class CustomerLogin extends JFrame{
                         parts[1].trim().equals(username) &&
                         parts[2].trim().equals(password) &&
                         parts[5].trim().equals("APPROVED")) {
-                    return true;
+                    return parts[0];
                 }
             }
         }catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Username or password is incorrect");
-            return false;
+            JOptionPane.showMessageDialog(this,
+                    "Error reading customers.txt: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
-        return false;
+        return null;
     }
 }
 

@@ -2,6 +2,7 @@ package ManagerPackage;
 
 import CarPackage.CarManagement;
 import CustomerPackage.CustomerManagement;
+import MainPackage.AppContext;
 import SalesmanPackage.SalesmanManagement;
 import MainPackage.LoginPage;
 
@@ -19,8 +20,10 @@ public class ManagersMain extends JFrame{
     private CarManagement carManagement;
     private CustomerManagement customerManagement;
     private SalesmanManagement salesmanManagement;
+    private AppContext context;
 
-    public ManagersMain() {
+    public ManagersMain(AppContext context) {
+        this.context = context;
         carManagement = new CarManagement();
         customerManagement = new CustomerManagement();
         salesmanManagement = new SalesmanManagement();
@@ -35,17 +38,17 @@ public class ManagersMain extends JFrame{
         });
         manageSalesmanProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Salesman Profile clicked");
-            new ManagerManageSalesman(salesmanManagement);
+            new ManagerManageSalesman(context);
             this.dispose();
         });
         manageCustomerProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Customer Profile clicked");
-            new ManagerManageCustomer();
+            new ManagerManageCustomer(context);
             this.dispose();
         });
         manageCarDetailsButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Car Details clicked");
-            new ManagerManageCars();
+            new ManagerManageCars(context);
             this.dispose();
         });
         paymentAndFeedbackAnalysisButton.addActionListener(e -> {
@@ -53,7 +56,7 @@ public class ManagersMain extends JFrame{
         });
         exitButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "You are back to the main page");
-            new LoginPage();
+            new LoginPage(context);
             this.dispose();
         });
     }

@@ -7,10 +7,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SalesmanManagement {
     private List<Salesman> salesmen;
     private List<UserActivity> activityLog;
+    private List<SalesRecord> SalesRecords;
     private static final String SALESMEN_FILE = "salesmen.txt";
     private static final String ACTIVITY_LOG = "salesman_activity.log";
     private static final String SALES_RECORDS_FILE = "sales_records.txt";
@@ -21,7 +23,9 @@ public class SalesmanManagement {
     public SalesmanManagement() {
         salesmen = new ArrayList<>();
         activityLog = new ArrayList<>();
+        SalesRecords = new ArrayList<>();
         loadSalesmen();
+        loadSalesRecords();
     }
     public void setCustomerManagement(CustomerManagement customerManagement) {
         this.customerManagement = customerManagement;
@@ -35,6 +39,15 @@ public class SalesmanManagement {
     }
 
     public Salesman getSalesmanById(String id) {
+        for (Salesman s : salesmen) {
+            if (s.getId().equals(id)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    public Salesman findById(String id) {
         for (Salesman s : salesmen) {
             if (s.getId().equals(id)) {
                 return s;
@@ -64,11 +77,11 @@ public class SalesmanManagement {
         return null;
     }
 
-    public boolean updateSalesman(String username, Salesman updatedSalesman) {
+    public boolean updateSalesman(Salesman updatedSalesman) {
         for (int i = 0; i < salesmen.size(); i++) {
-            if (salesmen.get(i).getUsername().equals(username)) {
+            if (salesmen.get(i).getId().equals(updatedSalesman.getId())) {
                 salesmen.set(i, updatedSalesman);
-                logActivity(username, "UPDATE", "Salesman information updated");
+                logActivity(updatedSalesman.getUsername(), "UPDATE", "Salesman information updated");
                 saveSalesmen();
                 return true;
             }
@@ -110,6 +123,11 @@ public class SalesmanManagement {
         logActivity(username, "SALE_ADDED", "New sale added: " + saleId);
         saveSalesmen();
         return true;
+    }
+    public List<SalesRecord> getSalesRecordsBySalesman(String salesmanId) {
+        return SalesRecords.stream()
+                .filter(r -> r.getSalesmanId().equals(salesmanId))
+                .collect(Collectors.toList());
     }
 
     // Confirm an order
@@ -157,6 +175,7 @@ public class SalesmanManagement {
         String recordId = UUID.randomUUID().toString();
         SalesRecord record = new SalesRecord(recordId, orderId, salesmanId, comment);
         appendToFile(SALES_RECORDS_FILE, record.toCSV());
+        SalesRecords.add(record);
         addSale(getSalesmanById(salesmanId).getUsername(), recordId);
         logActivity(salesmanId, "RECORD_SALE", "Sale recorded for order: " + orderId);
     }
@@ -242,5 +261,19 @@ public class SalesmanManagement {
             }
         }
         return result;
+    }
+
+    private void loadSalesRecords() {
+        File file = new File(SALES_RECORDS_FILE);
+        if (!file.exists()) return;
+        try (BufferedReader r = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                SalesRecord rec = SalesRecord.fromCSV(line);
+                if (rec != null) SalesRecords.add(rec);
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading sales records: " + e.getMessage());
+        }
     }
 }

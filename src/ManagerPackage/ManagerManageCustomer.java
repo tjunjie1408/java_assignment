@@ -2,6 +2,7 @@ package ManagerPackage;
 
 import CustomerPackage.Customer;
 import CustomerPackage.CustomerManagement;
+import MainPackage.AppContext;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -25,10 +26,12 @@ public class ManagerManageCustomer extends JFrame {
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> rowSorter;
     private static final String DATA_FILE = "customers.txt";
-    private CustomerManagement customerManagement; // 添加 CustomerManagement 实例
-    private List<Customer> customers; // 保存 Customer 对象列表
+    private CustomerManagement customerManagement;
+    private List<Customer> customers;
+    private AppContext context;
 
-    public ManagerManageCustomer() {
+    public ManagerManageCustomer(AppContext context) {
+        this.context = context;
         setContentPane(panel1);
         setTitle("Customer Profile Management");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -44,7 +47,7 @@ public class ManagerManageCustomer extends JFrame {
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Prevent direct table edits
+                return false;
             }
         };
         CustomerTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -55,7 +58,6 @@ public class ManagerManageCustomer extends JFrame {
     }
 
     private void initListeners() {
-        // Search functionality
         SearchTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 filter();
@@ -148,7 +150,7 @@ public class ManagerManageCustomer extends JFrame {
         // Exit functionality
         exitButton.addActionListener(e ->{
             this.dispose();
-            new ManagersMain();
+            new ManagersMain(context);
         });
     }
 
@@ -168,21 +170,21 @@ public class ManagerManageCustomer extends JFrame {
     }
 
     private void loadCustomerData() {
-        tableModel.setRowCount(0); // Clear existing rows
+        tableModel.setRowCount(0);
         Path path = Paths.get(DATA_FILE);
         if (!Files.exists(path)) return;
         try (BufferedReader br = Files.newBufferedReader(path)) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 7) {
+                if (parts.length >= 6) {
                     tableModel.addRow(new Object[]{
                             parts[0], // ID
                             parts[1], // Username
                             parts[2], // Password
                             parts[3], // Email
-                            parts[6], // Phone
-                            parts[4]  // Status
+                            parts[4], // Phone
+                            parts[5]  // Status
                     });
                 }
             }

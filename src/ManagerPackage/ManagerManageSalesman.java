@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CarPackage.CarManagement;
+import MainPackage.AppContext;
 import SalesmanPackage.*;
 
 public class ManagerManageSalesman extends JFrame {
@@ -24,9 +25,10 @@ public class ManagerManageSalesman extends JFrame {
     private JLabel Search;
     private DefaultTableModel tableModel;
     private SalesmanManagement salesmanManagement;
+    private AppContext context;
 
-    public ManagerManageSalesman(SalesmanManagement salesmanManagement) {
-        this.salesmanManagement = salesmanManagement;
+    public ManagerManageSalesman(AppContext context) {
+        this.context = context;
         setContentPane(panel1);
         setTitle("Manage Salesmen");
         setSize(800, 600);
@@ -41,7 +43,7 @@ public class ManagerManageSalesman extends JFrame {
         updateButton.addActionListener(e -> updateSalesman());
         deleteButton.addActionListener(e -> deleteSalesman());
         exitButton.addActionListener(e -> {
-            new ManagersMain();
+            new ManagersMain(context);
             this.dispose();
         });
         SearchTextField.addKeyListener(new KeyAdapter() {
@@ -57,7 +59,7 @@ public class ManagerManageSalesman extends JFrame {
 
     private void loadSalesmanData() {
         tableModel.setRowCount(0);
-        List<Salesman> salesmen = salesmanManagement.getSalesmen();
+        List<Salesman> salesmen = context.getSalesmanManagement().getSalesmen();
         for (Salesman salesman : salesmen) {
             tableModel.addRow(new Object[]{
                     salesman.getId(),
@@ -72,7 +74,7 @@ public class ManagerManageSalesman extends JFrame {
     private void searchSalesman() {
         String searchTerm = SearchTextField.getText().trim().toLowerCase();
         tableModel.setRowCount(0);
-        List<Salesman> salesmen = salesmanManagement.getSalesmen();
+        List<Salesman> salesmen = context.getSalesmanManagement().getSalesmen();
         for (Salesman salesman : salesmen) {
             if (salesman.getId().toLowerCase().contains(searchTerm) ||
                     salesman.getUsername().toLowerCase().contains(searchTerm) ||
@@ -109,48 +111,49 @@ public class ManagerManageSalesman extends JFrame {
 
     private void updateSalesman() {
         int selectedRow = SalesmanTable.getSelectedRow();
-        if (selectedRow != -1) {
-            String id = (String) tableModel.getValueAt(selectedRow, 0);
-            Salesman salesman = salesmanManagement.getSalesmanById(id);
-            if (salesman != null) {
-                String[] options = {"Username", "Password", "Email", "Phone Number"};
-                String selectedField = (String) JOptionPane.showInputDialog(
-                        this,
-                        "Select field to update:",
-                        "Update Salesman",
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (selectedField != null) {
-                    String newValue = JOptionPane.showInputDialog(
-                            this,
-                            "Enter new value for " + selectedField + ":"
-                    );
-                    if (newValue != null && !newValue.trim().isEmpty()) {
-                        switch (selectedField) {
-                            case "Username":
-                                salesman.setUsername(newValue);
-                                break;
-                            case "Password":
-                                salesman.setPassword(newValue);
-                                break;
-                            case "Email":
-                                salesman.setEmail(newValue);
-                                break;
-                            case "Phone Number":
-                                salesman.setPhoneNumber(newValue);
-                                break;
-                        }
-                        salesmanManagement.updateSalesman(salesman.getUsername(), salesman);
-                        loadSalesmanData();
-                        JOptionPane.showMessageDialog(this, selectedField + " updated successfully!");
-                    }
-                }
-            }
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select a salesman to update!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String id = (String) tableModel.getValueAt(selectedRow, 0);
+        Salesman salesman = salesmanManagement.findById(id);
+        if (salesman == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Selected salesman not found!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String[] options = {"Username", "Password", "Email", "Phone Number"};
+        String field = (String) JOptionPane.showInputDialog(
+                this, "Select field to update:", "Update Salesman",
+                JOptionPane.QUESTION_MESSAGE, null, options, options[0]
+        );
+        if (field == null) return;
+        String newValue = JOptionPane.showInputDialog(
+                this, "Enter new value for " + field + ":"
+        );
+        if (newValue == null || newValue.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    field + " cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        switch (field) {
+            case "Username"     -> salesman.setUsername(newValue.trim());
+            case "Password"     -> salesman.setPassword(newValue.trim());
+            case "Email"        -> salesman.setEmail(newValue.trim());
+            case "Phone Number" -> salesman.setPhoneNumber(newValue.trim());
+        }
+        boolean ok = salesmanManagement.updateSalesman(salesman);
+        if (ok) {
+            loadSalesmanData();
+            JOptionPane.showMessageDialog(this,
+                    field + " updated successfully!");
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a salesman to update!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Failed to update salesman " + salesman.getId(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -179,7 +182,7 @@ public class ManagerManageSalesman extends JFrame {
 
     private String generateNewId() {
         int maxId = 0;
-        for (Salesman s : salesmanManagement.getSalesmen()) {
+        for (Salesman s : context.getSalesmanManagement().getSalesmen()) {
             try {
                 int currentId = Integer.parseInt(s.getId());
                 maxId = Math.max(maxId, currentId);
