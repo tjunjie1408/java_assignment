@@ -14,10 +14,11 @@ public class CustomerLogin extends JFrame{
     private JLabel Username;
     private JLabel Password;
     private JPasswordField PasswordField;
-
+    private String customerId;
     private final CustomerManagement customerManagement;
-    public CustomerLogin(CustomerManagement cm) {
+    public CustomerLogin(CustomerManagement cm, String customerId) {
         this.customerManagement = cm;
+        this.customerId = customerId;
         initUI();
     }
     private void initUI() {
@@ -50,7 +51,7 @@ public class CustomerLogin extends JFrame{
                     JOptionPane.showMessageDialog(this,
                             "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
-                    new CustomerProfile(customerManagement);
+                    new CustomerProfile(customerManagement, customerId);
                 } else {
                     JOptionPane.showMessageDialog(this,
                             "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
@@ -69,7 +70,7 @@ public class CustomerLogin extends JFrame{
                 if (parts.length >= 6 &&
                         parts[1].trim().equals(username) &&
                         parts[2].trim().equals(password) &&
-                        parts[5].trim().equals("CUSTOMER")) {
+                        parts[5].trim().equals("APPROVED")) {
                     return true;
                 }
             }

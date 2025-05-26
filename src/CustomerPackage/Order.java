@@ -1,0 +1,34 @@
+package CustomerPackage;
+
+import java.util.Date;
+
+public class Order {
+    private String orderId;
+    private String customerId;
+    private String carId;
+    private String status;
+    private Date orderDate;
+
+    public Order(String orderId, String customerId, String carId, String status, Date orderDate) {
+        this.orderId = orderId;
+        this.customerId = customerId;
+        this.carId = carId;
+        this.status = status;
+        this.orderDate = orderDate;
+    }
+
+    public String getOrderId() { return orderId; }
+    public String getCustomerId() { return customerId; }
+    public String getCarId() { return carId; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String toCSV() {
+        return orderId + "," + customerId + "," + carId + "," + status + "," + orderDate.getTime();
+    }
+
+    public static Order fromCSV(String csv) {
+        String[] parts = csv.split(",");
+        return new Order(parts[0], parts[1], parts[2], parts[3], new Date(Long.parseLong(parts[4])));
+    }
+}

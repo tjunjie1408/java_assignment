@@ -13,7 +13,7 @@ public class ManagerManagement {
     private static final String ACTIVITY_LOG = "manager_activity.log";
     private static ManagerManagement instance;
 
-    private ManagerManagement() {
+    public ManagerManagement() {
         managers = new ArrayList<>();
         activityLog = new ArrayList<>();
         loadManagers();

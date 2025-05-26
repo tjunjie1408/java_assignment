@@ -61,8 +61,8 @@ public class Manager extends User {
 
     public static Manager fromCSV(String csv) {
         String[] parts = csv.split(",", 14);
-        Manager manager = new Manager(parts[0], parts[1], parts[2], parts[3], parts[8]);
-        manager.setStatus(UserStatus.valueOf(parts[4]));
+        Manager manager = new Manager(parts[0], parts[1], parts[2], parts[3], parts[9]);
+        manager.setStatus(UserStatus.valueOf(parts[5]));
         manager.setDepartment(parts[6]);
         manager.setPosition(parts[7]);
         manager.setOfficeLocation(parts[9]);

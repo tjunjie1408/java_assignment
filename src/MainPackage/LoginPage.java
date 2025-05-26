@@ -1,7 +1,9 @@
-package UIPackage;
+package MainPackage;
 
 import CustomerPackage.CustomerMain;
 import ManagerPackage.ManagerLogin;
+import SalesmanPackage.SalesmanLogin;
+import UserPackage.*;
 
 import javax.swing.*;
 
@@ -12,6 +14,8 @@ public class LoginPage extends JFrame{
     private JButton ManagerChoice;
     private JLabel LoginTitle;
     private JButton Exit;
+    private AppContext context = new AppContext();
+    private String salesId;
 
     public LoginPage() {
         setContentPane(panel1);
@@ -26,7 +30,9 @@ public class LoginPage extends JFrame{
             this.dispose();
         });
         SalesmanChoice.addActionListener(e -> {
-
+            JOptionPane.showMessageDialog(null, "Salesman Main Page");
+            new SalesmanLogin(context, salesId);
+            this.dispose();
         });
         ManagerChoice.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Manager Main Page");

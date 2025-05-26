@@ -1,6 +1,6 @@
 package ManagerPackage;
 
-import UIPackage.LoginPage;
+import MainPackage.LoginPage;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -34,12 +34,14 @@ public class ManagerLogin extends JFrame{
                 JOptionPane.showMessageDialog(this, "Username and password cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // Authenticate the user
             if (authenticate(username, password)) {
                 JOptionPane.showMessageDialog(this, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-                new ManagersMain();
+                try {
+                    new ManagersMain();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                this.dispose();
             }else if(username.equals("superadmin") && password.equals("admin123")){
                 new SuperAdminPage();
                 this.dispose();
@@ -53,10 +55,10 @@ public class ManagerLogin extends JFrame{
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 6 &&
+                if (parts.length >= 7 &&
                         parts[1].trim().equals(username) &&
                         parts[2].trim().equals(password) &&
-                        parts[5].trim().equals("MANAGER")) {
+                        parts[6].trim().equals("MANAGER")) {
                     return true;
                 }
             }

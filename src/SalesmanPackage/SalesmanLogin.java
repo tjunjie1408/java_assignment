@@ -1,13 +1,16 @@
 package SalesmanPackage;
-import UIPackage.*;
+import CarPackage.CarManagement;
+import CustomerPackage.CustomerManagement;
+import MainPackage.AppContext;
+import MainPackage.LoginPage;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class SalesmanLogin extends JFrame{
+    private final String salesmanId;
     private JPanel panel1;
     private JTextField UsernameTextField;
     private JPasswordField PasswordField;
@@ -16,8 +19,11 @@ public class SalesmanLogin extends JFrame{
     private JLabel Password;
     private JButton cancelButton;
     private JButton loginButton;
+    private AppContext context;
 
-    public SalesmanLogin() {
+    public SalesmanLogin(AppContext context, String salesmanId) {
+        this.context = context;
+        this.salesmanId = salesmanId;
         setContentPane(panel1);
         setTitle(SalesmanLoginPage.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -32,18 +38,14 @@ public class SalesmanLogin extends JFrame{
         loginButton.addActionListener(e -> {
             String username = UsernameTextField.getText().trim();
             String password = new String(PasswordField.getPassword()).trim();
-
-            // Check for empty fields
             if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(SalesmanLogin.this, "Username and password cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // Authenticate the user
             if (authenticate(username, password)) {
                 JOptionPane.showMessageDialog(SalesmanLogin.this, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
-                new SalesmanMain();
+                new SalesmanMain(context, salesmanId);
             } else {
                 JOptionPane.showMessageDialog(SalesmanLogin.this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
@@ -54,10 +56,10 @@ public class SalesmanLogin extends JFrame{
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 6 &&
+                if (parts.length >= 7 &&
                         parts[1].trim().equals(username) &&
                         parts[2].trim().equals(password) &&
-                        parts[5].trim().equals("SALESMAN")) {
+                        parts[6].trim().equals("SALESMAN")) {
                     return true;
                 }
             }

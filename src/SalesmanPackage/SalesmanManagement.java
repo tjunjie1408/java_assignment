@@ -1,23 +1,35 @@
 package SalesmanPackage;
 
 import UserPackage.*;
-
+import CustomerPackage.*;
+import CarPackage.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class SalesmanManagement {
     private List<Salesman> salesmen;
     private List<UserActivity> activityLog;
     private static final String SALESMEN_FILE = "salesmen.txt";
     private static final String ACTIVITY_LOG = "salesman_activity.log";
+    private static final String SALES_RECORDS_FILE = "sales_records.txt";
+    private CustomerManagement customerManagement; // Dependency to access orders
+    private CarManagement carManagement; // Assumed dependency
+    private String email;
 
     public SalesmanManagement() {
         salesmen = new ArrayList<>();
         activityLog = new ArrayList<>();
         loadSalesmen();
     }
+    public void setCustomerManagement(CustomerManagement customerManagement) {
+        this.customerManagement = customerManagement;
+    }
 
+    public void setCarManagement(CarManagement carManagement) {
+        this.carManagement = carManagement;
+    }
     public List<Salesman> getSalesmen() {
         return salesmen;
     }
@@ -82,7 +94,7 @@ public class SalesmanManagement {
             return false;
         }
         salesman.setPhoneNumber(phoneNumber);
-        salesman.setAddress(address);
+        salesman.setEmail(email);
         logActivity(username, "PROFILE_UPDATE", "Profile information updated");
         saveSalesmen();
         return true;
@@ -100,6 +112,55 @@ public class SalesmanManagement {
         return true;
     }
 
+    // Confirm an order
+    public void confirmOrder(String orderId, String salesmanId) {
+        Order order = customerManagement.findOrder(orderId);
+        if (order == null || !"PENDING".equals(order.getStatus())) {
+            throw new IllegalStateException("Cannot confirm order");
+        }
+        order.setStatus("CONFIRMED");
+        Car car = carManagement.getCar(order.getCarId());
+        if (car != null) {
+            car.setStatus("Booked");
+            carManagement.updateCar(car.getCarId(),car);
+        }
+        customerManagement.saveOrders();
+        logActivity(salesmanId, "CONFIRM_ORDER", "Order confirmed: " + orderId);
+    }
+
+    // Update car status
+    public void updateCarStatus(String carId, String newStatus) {
+        Car car = carManagement.getCar(carId);
+        if (car != null) {
+            car.setStatus(newStatus);
+            carManagement.updateCar(car.getCarId(), car);
+            List<Order> orders = customerManagement.getOrdersByCarId(carId);
+            for (Order order : orders) {
+                switch (newStatus) {
+                    case "BOOKED" -> order.setStatus("CONFIRMED");
+                    case "PAID" -> order.setStatus("PAID");
+                    case "CANCELLED" -> order.setStatus("CANCELLED");
+                    case null, default -> order.setStatus("PENDING");
+                }
+            }
+            customerManagement.saveOrders();
+            logActivity("SYSTEM", "UPDATE_CAR_STATUS", "Car status updated: " + carId + " to " + newStatus);
+        }
+    }
+
+    // Record a sale
+    public void recordSale(String orderId, String salesmanId, String comment) {
+        Order order = customerManagement.findOrder(orderId);
+        if (order == null || !"PAID".equals(order.getStatus())) {
+            throw new IllegalStateException("Cannot record sale for unpaid order");
+        }
+        String recordId = UUID.randomUUID().toString();
+        SalesRecord record = new SalesRecord(recordId, orderId, salesmanId, comment);
+        appendToFile(SALES_RECORDS_FILE, record.toCSV());
+        addSale(getSalesmanById(salesmanId).getUsername(), recordId);
+        logActivity(salesmanId, "RECORD_SALE", "Sale recorded for order: " + orderId);
+    }
+
     private void loadSalesmen() {
         File file = new File(SALESMEN_FILE);
         if (!file.exists()) {
@@ -111,7 +172,7 @@ public class SalesmanManagement {
             }
             return;
         }
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(SALESMEN_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 Salesman salesman = Salesman.fromCSV(line);
@@ -133,6 +194,13 @@ public class SalesmanManagement {
         } catch (IOException e) {
             System.out.println("Error saving salesmen.txt file: " + e.getMessage());
         }
+    }
+
+    private void appendToFile(String fileName, String data) {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName, true))) {
+            w.write(data);
+            w.newLine();
+        } catch (IOException e) { System.out.println("Error appending to " + fileName + ": " + e.getMessage()); }
     }
 
     private void logActivity(String username, String action, String details) {

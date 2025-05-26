@@ -74,7 +74,6 @@ public class CarManagement {
         return result;
     }
 
-    // 按状态搜索
     public List<Car> searchByStatus(String status) {
         List<Car> result = new ArrayList<>();
         for (Car c : cars) {
@@ -114,7 +113,7 @@ public class CarManagement {
         try (BufferedReader br = new BufferedReader(new FileReader("cars.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                Car car = Car.fromCSV(line); // 假设有一个 fromCSV 方法
+                Car car = Car.fromCSV(line);
                 cars.add(car);
             }
         } catch (IOException e) {

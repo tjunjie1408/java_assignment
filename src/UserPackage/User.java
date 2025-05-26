@@ -54,13 +54,16 @@ public abstract class User {
     // CSV conversion
     public abstract String toCSV();
     public static User fromCSV(String csv) {
-        String[] parts = csv.split(",");
-        UserRole role = UserRole.valueOf(parts[5]);
+        String[] parts = csv.split(",", -1);
+        if (parts.length < 7) {
+            throw new IllegalArgumentException("Insufficient CSV fields");
+        }
+        UserRole role = UserRole.valueOf(parts[6]);
         return switch (role) {
+            case CUSTOMER -> Customer.fromCSV(csv);
             case MANAGER -> Manager.fromCSV(csv);
             case SALESMAN -> Salesman.fromCSV(csv);
-            case CUSTOMER -> Customer.fromCSV(csv);
-            default -> throw new IllegalArgumentException("Invalid role: " + role);
+            default -> throw new IllegalArgumentException("Invalid Role: " + role);
         };
     }
 }

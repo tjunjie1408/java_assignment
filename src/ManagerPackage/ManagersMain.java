@@ -1,7 +1,9 @@
 package ManagerPackage;
 
-import UIPackage.LoginPage;
-import UIPackage.ManagerManageCars;
+import CarPackage.CarManagement;
+import CustomerPackage.CustomerManagement;
+import SalesmanPackage.SalesmanManagement;
+import MainPackage.LoginPage;
 
 import javax.swing.*;
 
@@ -14,8 +16,14 @@ public class ManagersMain extends JFrame{
     private JButton paymentAndFeedbackAnalysisButton;
     private JButton exitButton;
     private JLabel ManagerMainPage;
+    private CarManagement carManagement;
+    private CustomerManagement customerManagement;
+    private SalesmanManagement salesmanManagement;
 
     public ManagersMain() {
+        carManagement = new CarManagement();
+        customerManagement = new CustomerManagement();
+        salesmanManagement = new SalesmanManagement();
         setContentPane(panel1);
         setTitle(ManagerMainPage.getText());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -27,7 +35,7 @@ public class ManagersMain extends JFrame{
         });
         manageSalesmanProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Salesman Profile clicked");
-            new ManagerManageSalesman();
+            new ManagerManageSalesman(salesmanManagement);
             this.dispose();
         });
         manageCustomerProfileButton.addActionListener(e -> {

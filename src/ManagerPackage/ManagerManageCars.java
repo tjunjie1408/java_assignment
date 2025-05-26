@@ -1,18 +1,13 @@
-package UIPackage;
+package ManagerPackage;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import CarPackage.*;
-import ManagerPackage.*;
 
 public class ManagerManageCars extends JFrame {
     private JPanel panel1;
@@ -110,6 +105,7 @@ public class ManagerManageCars extends JFrame {
     }
 
     private void loadCarData() {
+        tableModel.setRowCount(0);
         List<Car> cars = carManagement.getAllCars();
         System.out.println("Loading " + cars.size() + " cars into table.");
         for (Car car : cars) {
@@ -261,103 +257,129 @@ public class ManagerManageCars extends JFrame {
         }
     }
 
-    class UpdateCarDialog extends JDialog {
+    public class UpdateCarDialog extends JDialog {
         private Car car;
-        private JTextField brandField, modelField, colorField, priceField, statusField, photoPathField;
+        private JComboBox<String> fieldCombo;
+        private JTextField valueField;
         private JButton selectPhotoButton, updateButton, cancelButton;
 
+        // 可更新的字段列表
+        private static final String[] FIELDS = {
+                "Brand", "Model", "Color", "Price", "Status", "Photo Path"
+        };
+
         public UpdateCarDialog(JFrame parent, Car car) {
-            super(parent, "Update Car", true);
+            super(parent, "Update Car (" + car.getCarId() + ")", true);
             this.car = car;
-            setLayout(new GridLayout(7, 2, 5, 5));
-
-            add(new JLabel("Car ID:"));
-            add(new JLabel(car.getCarId()));
-
-            add(new JLabel("Brand:"));
-            brandField = new JTextField(car.getBrand(), 10);
-            add(brandField);
-
-            add(new JLabel("Model:"));
-            modelField = new JTextField(car.getModel(), 10);
-            add(modelField);
-
-            add(new JLabel("Color:"));
-            colorField = new JTextField(car.getColor(), 10);
-            add(colorField);
-
-            add(new JLabel("Price:"));
-            priceField = new JTextField(String.valueOf(car.getPrice()), 10);
-            add(priceField);
-
-            add(new JLabel("Status:"));
-            statusField = new JTextField(car.getStatus(), 10);
-            add(statusField);
-
-            add(new JLabel("Photo Path:"));
-            photoPathField = new JTextField(car.getPhotoPath(), 10);
-            add(photoPathField);
-
-            selectPhotoButton = new JButton("Select Photo");
-            selectPhotoButton.addActionListener(e -> selectPhoto());
-            add(selectPhotoButton);
-
-            updateButton = new JButton("Update");
-            updateButton.addActionListener(e -> updateCar());
-            add(updateButton);
-
-            cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> dispose());
-            add(cancelButton);
-
+            initComponents();
+            layoutComponents();
             pack();
             setLocationRelativeTo(parent);
         }
 
+        private void initComponents() {
+            fieldCombo = new JComboBox<>(FIELDS);
+            valueField = new JTextField(20);
+
+            selectPhotoButton = new JButton("Select Photo");
+            selectPhotoButton.setVisible(false);
+            selectPhotoButton.addActionListener(e -> selectPhoto());
+
+            updateButton = new JButton("Update");
+            updateButton.addActionListener(e -> updateCar());
+
+            cancelButton = new JButton("Cancel");
+            cancelButton.addActionListener(e -> dispose());
+
+            fieldCombo.addActionListener(e -> {
+                String sel = (String) fieldCombo.getSelectedItem();
+                if ("Photo Path".equals(sel)) {
+                    selectPhotoButton.setVisible(true);
+                    valueField.setText(car.getPhotoPath());
+                } else {
+                    selectPhotoButton.setVisible(false);
+                    switch (sel) {
+                        case "Brand":  valueField.setText(car.getBrand()); break;
+                        case "Model":  valueField.setText(car.getModel()); break;
+                        case "Color":  valueField.setText(car.getColor()); break;
+                        case "Price":  valueField.setText(String.valueOf(car.getPrice())); break;
+                        case "Status": valueField.setText(car.getStatus()); break;
+                    }
+                }
+            });
+
+            fieldCombo.setSelectedIndex(0);
+            valueField.setText(car.getBrand());
+        }
+
+        private void layoutComponents() {
+            setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(8, 8, 8, 8);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+            add(new JLabel("Select field to update for Car ID: " + car.getCarId()), gbc);
+
+            gbc.gridy = 1; gbc.gridwidth = 1;
+            add(new JLabel("Field:"), gbc);
+            gbc.gridx = 1;
+            add(fieldCombo, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 2;
+            add(new JLabel("New Value:"), gbc);
+            gbc.gridx = 1;
+            add(valueField, gbc);
+
+            gbc.gridy = 3; gbc.gridx = 1;
+            add(selectPhotoButton, gbc);
+
+            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+            btnPanel.add(updateButton);
+            btnPanel.add(cancelButton);
+            gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+            add(btnPanel, gbc);
+        }
+
         private void selectPhoto() {
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                photoPathField.setText(selectedFile.getAbsolutePath());
+                File f = fileChooser.getSelectedFile();
+                valueField.setText(f.getAbsolutePath());
             }
         }
 
         private void updateCar() {
-            String brand = brandField.getText().trim();
-            String model = modelField.getText().trim();
-            String color = colorField.getText().trim();
-            String priceStr = priceField.getText().trim();
-            String status = statusField.getText().trim();
-            String photoPath = photoPathField.getText().trim();
-
-            if (brand.isEmpty() || model.isEmpty() || color.isEmpty() || priceStr.isEmpty() || status.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "All fields except photo path are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            String field = (String) fieldCombo.getSelectedItem();
+            String newValue = valueField.getText().trim();
+            if (newValue.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            double price;
             try {
-                price = Double.parseDouble(priceStr);
-                if (price < 0) {
-                    JOptionPane.showMessageDialog(this, "Price cannot be negative!", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
+                switch (field) {
+                    case "Brand":      car.setBrand(newValue);  break;
+                    case "Model":      car.setModel(newValue);  break;
+                    case "Color":      car.setColor(newValue);  break;
+                    case "Price":
+                        double price = Double.parseDouble(newValue);
+                        if (price < 0) throw new NumberFormatException();
+                        car.setPrice(price);
+                        break;
+                    case "Status":     car.setStatus(newValue); break;
+                    case "Photo Path": car.setPhotoPath(newValue); break;
                 }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Price must be a valid number!", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Price must be a non-negative number!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            car.setBrand(brand);
-            car.setModel(model);
-            car.setColor(color);
-            car.setPrice(price);
-            car.setStatus(status);
-            car.setPhotoPath(photoPath);
-
-            if (carManagement.updateCar(car.getCarId(), car)) {
-                dispose();
+            boolean ok = carManagement.updateCar(car.getCarId(), car);
+            if (ok) {
                 JOptionPane.showMessageDialog(this, "Car updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update car!", "Error", JOptionPane.ERROR_MESSAGE);
             }

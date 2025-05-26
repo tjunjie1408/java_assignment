@@ -1,5 +1,8 @@
 package ManagerPackage;
 
+import CustomerPackage.Customer;
+import CustomerPackage.CustomerManagement;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -19,10 +22,11 @@ public class ManagerManageCustomer extends JFrame {
     private JButton deleteButton;
     private JButton exitButton;
     private JLabel CustomerProfileManagement;
-
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> rowSorter;
     private static final String DATA_FILE = "customers.txt";
+    private CustomerManagement customerManagement; // 添加 CustomerManagement 实例
+    private List<Customer> customers; // 保存 Customer 对象列表
 
     public ManagerManageCustomer() {
         setContentPane(panel1);
@@ -171,9 +175,7 @@ public class ManagerManageCustomer extends JFrame {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 7) { // Ensure enough fields
-                    // Map file fields to table columns:
-                    // ID (0), Username (1), Password (2), Email (3), Phone (6), Status (4)
+                if (parts.length >= 7) {
                     tableModel.addRow(new Object[]{
                             parts[0], // ID
                             parts[1], // Username

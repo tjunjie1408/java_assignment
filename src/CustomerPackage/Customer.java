@@ -83,21 +83,22 @@ public class Customer extends User {
     }
 
     public static Customer fromCSV(String csv) {
-        csv = csv.replaceAll(",+$", "");
-        String[] parts = csv.split(",", 10);
-        String[] cols = new String[10];
-        for (int i = 0; i < 10; i++) {
-            cols[i] = i < parts.length ? parts[i] : "";
+        String[] parts = csv.split(",", -1); // -1 保留所有空项
+        // parts: [0]=id, [1]=username, [2]=password, [3]=email,
+        //        [4]=phone, [5]=status, … （如果还有更多列）
+        Customer c = new Customer(
+                parts[0],              // id
+                parts[1],              // username
+                parts[2],              // password
+                parts[3],              // email
+                parts[4]               // phone number
+        );
+        // 现在把 status 从 parts[5] 读取
+        if (!parts[5].isBlank()) {
+            c.setStatus(UserStatus.valueOf(parts[5]));
         }
-        Customer c = new Customer(cols[0], cols[1], cols[2], cols[3], cols[6]);
-        if (!cols[4].isEmpty()) c.setStatus(UserStatus.valueOf(cols[4]));
-        c.setPreferredPaymentMethod(cols[7]);
-        c.setPreferredContactMethod(cols[8]);
-        if (!cols[9].isEmpty()) {
-            for (String pid : cols[9].split(";")) {
-                c.addPurchase(pid.replace("\\;", ";"));
-            }
-        }
+        // 如果你后面又加了 preferredPaymentMethod、preferredContactMethod、purchaseHistory
+        // 就继续读取 parts[6], parts[7], parts[8]...
         return c;
     }
 }

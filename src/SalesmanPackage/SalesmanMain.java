@@ -1,10 +1,14 @@
-package UIPackage;
+package SalesmanPackage;
+
+import CarPackage.CarManagement;
+import CustomerPackage.CustomerManagement;
+import MainPackage.AppContext;
+import MainPackage.LoginPage;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class SalesmanMain extends JFrame{
+    private final String salesmanId;
     private JPanel panel1;
     private JLabel SalesmanProfile;
     private JButton editProfileButton;
@@ -12,8 +16,11 @@ public class SalesmanMain extends JFrame{
     private JButton collectPaymentAndCommentButton;
     private JButton viewSalesRecordsButton;
     private JButton exitButton;
+    private AppContext context;
 
-    public SalesmanMain() {
+    public SalesmanMain(AppContext context, String salesmanId) {
+        this.context = context;
+        this.salesmanId = salesmanId;
         setContentPane(panel1);
         setTitle(SalesmanProfile.getText());
         pack();
@@ -24,7 +31,9 @@ public class SalesmanMain extends JFrame{
 
         });
         viewAndUpdateStatusButton.addActionListener(e -> {
-
+            JOptionPane.showMessageDialog(null, "View and Update Status");
+            new SalesmanEditCar(context ,salesmanId);
+            this.dispose();
         });
         collectPaymentAndCommentButton.addActionListener(e -> {
 

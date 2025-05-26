@@ -7,13 +7,14 @@ public class CustomerProfile extends JFrame{
     private JLabel Profile;
     private JButton EditProfile;
     private JButton ViewAvailableCar;
-    private JButton GiveFeedbackAndRatings;
     private JButton Logout;
     private JButton ViewPurchaseHistories;
     private CustomerManagement customerManagement;
+    private String customerId;
 
-    public CustomerProfile(CustomerManagement cm) {
+    public CustomerProfile(CustomerManagement cm, String customerId) {
         this.customerManagement = cm;
+        this.customerId = customerId;
         initUI();
     }
 
@@ -32,13 +33,11 @@ public class CustomerProfile extends JFrame{
         });
 
         EditProfile.addActionListener(e -> {
-            
+
         });
         ViewAvailableCar.addActionListener(e -> {
-
-        });
-        GiveFeedbackAndRatings.addActionListener(e -> {
-
+            JOptionPane.showMessageDialog(null, "You are viewing available cars");
+            new CustomerBookedCar(customerManagement,customerId);
         });
         ViewPurchaseHistories.addActionListener(e -> {
 

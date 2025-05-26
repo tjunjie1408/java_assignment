@@ -9,6 +9,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+
+import CarPackage.CarManagement;
 import SalesmanPackage.*;
 
 public class ManagerManageSalesman extends JFrame {
@@ -23,13 +25,13 @@ public class ManagerManageSalesman extends JFrame {
     private DefaultTableModel tableModel;
     private SalesmanManagement salesmanManagement;
 
-    public ManagerManageSalesman() {
+    public ManagerManageSalesman(SalesmanManagement salesmanManagement) {
+        this.salesmanManagement = salesmanManagement;
         setContentPane(panel1);
         setTitle("Manage Salesmen");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        salesmanManagement = new SalesmanManagement();
         String[] columnNames = {"Salesman ID", "Username", "Password", "Email", "Phone Number"};
         tableModel = new DefaultTableModel(columnNames, 0) ;
         SalesmanTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -58,7 +60,7 @@ public class ManagerManageSalesman extends JFrame {
         List<Salesman> salesmen = salesmanManagement.getSalesmen();
         for (Salesman salesman : salesmen) {
             tableModel.addRow(new Object[]{
-                    salesman.getSalesId(),
+                    salesman.getId(),
                     salesman.getUsername(),
                     salesman.getPassword(),
                     salesman.getEmail(),
@@ -72,12 +74,12 @@ public class ManagerManageSalesman extends JFrame {
         tableModel.setRowCount(0);
         List<Salesman> salesmen = salesmanManagement.getSalesmen();
         for (Salesman salesman : salesmen) {
-            if (salesman.getSalesId().toLowerCase().contains(searchTerm) ||
+            if (salesman.getId().toLowerCase().contains(searchTerm) ||
                     salesman.getUsername().toLowerCase().contains(searchTerm) ||
                     salesman.getEmail().toLowerCase().contains(searchTerm) ||
                     salesman.getPhoneNumber().toLowerCase().contains(searchTerm)) {
                 tableModel.addRow(new Object[]{
-                        salesman.getSalesId(),
+                        salesman.getId(),
                         salesman.getUsername(),
                         salesman.getPassword(),
                         salesman.getEmail(),
@@ -178,8 +180,12 @@ public class ManagerManageSalesman extends JFrame {
     private String generateNewId() {
         int maxId = 0;
         for (Salesman s : salesmanManagement.getSalesmen()) {
-            int currentId = Integer.parseInt(s.getId().substring(1));
-            maxId = Math.max(maxId, currentId);
+            try {
+                int currentId = Integer.parseInt(s.getId());
+                maxId = Math.max(maxId, currentId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid id format: " + s.getId());
+            }
         }
         return String.valueOf(maxId + 1);
     }
