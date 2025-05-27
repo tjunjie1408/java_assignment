@@ -2,6 +2,8 @@ package CustomerPackage;
 
 import java.util.Date;
 
+import java.util.Date;
+
 public class Payment {
     private String paymentId;
     private String orderId;
@@ -9,45 +11,62 @@ public class Payment {
     private Date paymentDate;
 
     public Payment(String paymentId, String orderId, double amount, Date paymentDate) {
-        this.paymentId = paymentId;
-        this.orderId = orderId;
-        this.amount = amount;
+        this.paymentId   = paymentId;
+        this.orderId     = orderId;
+        this.amount      = amount;
         this.paymentDate = paymentDate;
     }
 
-    public String getPaymentId() {
-        return paymentId;
-    }
+    // Getters and setters
+    public String getPaymentId() { return paymentId; }
+    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
+    public String getOrderId() { return orderId; }
+    public void setOrderId(String orderId) { this.orderId = orderId; }
 
-    public String getOrderId() {
-        return orderId;
-    }
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public Date getPaymentDate() {
-        return paymentDate;
-    }
-
-    public void setPaymentDate(Date paymentDate) {
-        this.paymentDate = paymentDate;
-    }
+    public Date getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(Date paymentDate) { this.paymentDate = paymentDate; }
 
     public String toCSV() {
-        return paymentId + "," + orderId + "," + amount + "," + paymentDate.getTime();
+        return String.join(",",
+                paymentId,
+                orderId,
+                String.valueOf(amount),
+                String.valueOf(paymentDate.getTime())
+        );
+    }
+
+    public static Payment fromCSV(String csv) {
+        if (csv == null || csv.isEmpty()) return null;
+        String[] parts = csv.split(",", 4);
+        if (parts.length < 4) return null;
+        String pid = parts[0].trim();
+        String oid = parts[1].trim();
+        double amt;
+        try {
+            amt = Double.parseDouble(parts[2].trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        long ts;
+        try {
+            ts = Long.parseLong(parts[3].trim());
+        } catch (NumberFormatException e) {
+            ts = System.currentTimeMillis();
+        }
+        return new Payment(pid, oid, amt, new Date(ts));
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "paymentId='" + paymentId + '\'' +
+                ", orderId='" + orderId + '\'' +
+                ", amount=" + amount +
+                ", paymentDate=" + paymentDate +
+                '}';
     }
 }

@@ -49,6 +49,7 @@ public class Manager extends User {
     public void addApproval(String approvalId) { approvalHistory.add(approvalId); }
     public String getAccessLevel() { return accessLevel; }
     public void setAccessLevel(String accessLevel) { this.accessLevel = accessLevel; }
+    public void setRole(UserRole role) { this.role = role; }
 
     @Override
     public String toCSV() {
@@ -60,20 +61,25 @@ public class Manager extends User {
     }
 
     public static Manager fromCSV(String csv) {
-        String[] parts = csv.split(",", 14);
-        Manager manager = new Manager(parts[0], parts[1], parts[2], parts[3], parts[9]);
-        manager.setStatus(UserStatus.valueOf(parts[5]));
-        manager.setDepartment(parts[6]);
-        manager.setPosition(parts[7]);
-        manager.setOfficeLocation(parts[9]);
-        manager.setEmployeeId(parts[10]);
-        manager.setAccessLevel(parts[11]);
-        if (parts.length > 12 && !parts[12].isEmpty()) {
-            manager.managedSalesmen = Arrays.asList(parts[12].split(";"));
+        String[] parts = csv.split(",", -1);
+        if (parts.length < 7) {
+            throw new IllegalArgumentException("Invalid manager CSV: " + csv);
         }
-        if (parts.length > 13 && !parts[13].isEmpty()) {
-            manager.approvalHistory = Arrays.asList(parts[13].split(";"));
+        String id       = parts[0].trim();
+        String username = parts[1].trim();
+        String password = parts[2].trim();
+        String email    = parts[3].trim();
+        String phone    = parts[4].trim();
+        String statusStr= parts[5].trim();
+        String roleStr  = parts[6].trim();
+
+        Manager m = new Manager(id, username, password, email, phone);
+        if (!statusStr.isEmpty()) {
+            m.setStatus(UserStatus.valueOf(statusStr));
         }
-        return manager;
+        if (!roleStr.isEmpty()) {
+            m.setRole(UserRole.valueOf(roleStr));
+        }
+        return m;
     }
 }

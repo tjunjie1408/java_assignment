@@ -10,6 +10,10 @@ public class AppContext {
     private SalesmanManagement salesmanManagement;
     private CustomerManagement customerManagement;
     private ManagerManagement managerManagement;
+    private String currentManagerId;
+    private String currentSalesmanId;
+    private String currentCustomerId;
+    private String carId;
 
     public AppContext() {
         this.carManagement = new CarManagement();
@@ -31,5 +35,33 @@ public class AppContext {
 
     public CustomerManagement getCustomerManagement() {
         return customerManagement;
+    }
+
+    public ManagerManagement getManagerManagement() {
+        return managerManagement;
+    }
+    public void setCurrentManagerId(String id) {
+        this.currentManagerId = id;
+    }
+    public String getCurrentManagerId() {
+        return currentManagerId;
+    }
+    public void setCurrentSalesmanId(String id) {
+        this.currentSalesmanId = id;
+    }
+    public String getCurrentSalesmanId() {
+        return currentSalesmanId;
+    }
+    public void setCurrentCustomerId(String id) {
+        this.currentCustomerId = id;
+    }
+    public String getCurrentCustomerId() {
+        return currentCustomerId;
+    }
+    public void setCarId(String id) {
+        this.carId = id;
+    }
+    public String getCarId() {
+        return carId;
     }
 }

@@ -63,11 +63,20 @@ public class ManagerManagement {
         return null;
     }
 
-    public boolean updateManager(String username, Manager updatedManager) {
+    public Manager findById(String id) {
+        for (Manager m : managers) {
+            if (m.getId().equals(id)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    public boolean updateManager(Manager updatedManager) {
         for (int i = 0; i < managers.size(); i++) {
-            if (managers.get(i).getUsername().equals(username)) {
+            if (managers.get(i).getId().equals(updatedManager.getId())) {
                 managers.set(i, updatedManager);
-                logActivity(username, "UPDATE", "Manager information updated");
+                logActivity(updatedManager.getUsername(), "UPDATE", "Manager info updated");
                 saveManagers();
                 return true;
             }
@@ -75,12 +84,17 @@ public class ManagerManagement {
         return false;
     }
 
-    public boolean deleteManager(String username) {
-        for (int i = 0; i < managers.size(); i++) {
-            if (managers.get(i).getUsername().equals(username)) {
-                managers.remove(i);
-                logActivity(username, "DELETE", "Manager deleted");
+    public boolean updateManager(String unusedUsername, Manager updatedManager) {
+        return updateManager(updatedManager);
+    }
+
+    public boolean deleteManager(String id) {
+        Iterator<Manager> it = managers.iterator();
+        while (it.hasNext()) {
+            if (it.next().getId().equals(id)) {
+                it.remove();
                 saveManagers();
+                logActivity(id, "DELETE", "Manager account deleted");
                 return true;
             }
         }
@@ -137,24 +151,24 @@ public class ManagerManagement {
 
     // File Operations
     private void loadManagers() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(MANAGERS_FILE))) {
+        File f = new File(MANAGERS_FILE);
+        if (!f.exists()) return;
+        try (BufferedReader r = new BufferedReader(new FileReader(f))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                Manager manager = Manager.fromCSV(line);
-                managers.add(manager);
+            while ((line = r.readLine()) != null) {
+                Manager m = Manager.fromCSV(line);
+                if (m != null) managers.add(m);
             }
         } catch (IOException e) {
-            System.out.println("Error loading managers: " + e.getMessage());
+            System.err.println("Error loading managers: " + e.getMessage());
         }
     }
 
     private void saveManagers() {
-        System.out.println("Saving managers to " + MANAGERS_FILE);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(MANAGERS_FILE))) {
-            for (Manager manager : managers) {
-                System.out.println("Writing manager: " + manager.toCSV());
-                writer.write(manager.toCSV());
-                writer.newLine();
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(MANAGERS_FILE))) {
+            for (Manager m : managers) {
+                w.write(m.toCSV());
+                w.newLine();
             }
         } catch (IOException e) {
             System.err.println("Error saving managers: " + e.getMessage());

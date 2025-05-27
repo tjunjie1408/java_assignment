@@ -85,7 +85,8 @@ public class CustomerBookedCar extends JFrame {
         });
 
         feedbackButton.addActionListener(e -> {
-            List<Order> customerOrders = customerManagement.getCustomerOrders(customerId);
+            String username = customerManagement.findById(customerId).getUsername();
+            List<Order> customerOrders = customerManagement.getCustomerOrdersByUsername(username);
             List<Order> feedbackOrders = customerOrders.stream()
                     .filter(o -> "PAID".equals(o.getStatus()))
                     .toList();

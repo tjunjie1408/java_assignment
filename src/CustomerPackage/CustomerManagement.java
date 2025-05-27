@@ -87,12 +87,12 @@ public class CustomerManagement {
 
     // Place an order
     public Order placeOrder(String customerId, String carId) {
-        Car car = carManagement.getCar(carId);
-        if (car == null || !"Available".equals(car.getStatus())) {
-            throw new IllegalStateException("Car not available");
-        }
         Customer c = findById(customerId);
         String username = c.getUsername();
+        Car car = carManagement.getCar(carId);
+        if (car == null || !"Available".equalsIgnoreCase(car.getStatus())) {
+            throw new IllegalStateException("Car not available");
+        }
         String orderId = UUID.randomUUID().toString();
         Order order = new Order(orderId, username, carId, "PENDING", new Date());
         orders.add(order);
@@ -246,9 +246,9 @@ public class CustomerManagement {
         log("DELETE", c.getUsername());
     }
 
-    public List<Order> getCustomerOrders(String customerId) {
+    public List<Order> getCustomerOrdersByUsername(String username) {
         return orders.stream()
-                .filter(order -> order.getUsername().equals(customerId))
+                .filter(o -> username.equals(o.getUsername()))
                 .collect(Collectors.toList());
     }
 }

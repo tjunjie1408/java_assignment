@@ -34,41 +34,42 @@ public class ManagerLogin extends JFrame{
             String username = NameTextField.getText().trim();
             String password = new String(PasswordField.getPassword()).trim();
             if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Username and password cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Username and password cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (authenticate(username, password)) {
+            String id = authenticateAndGetId(username, password);
+            if (id != null) {
+                context.setCurrentManagerId(id);
                 JOptionPane.showMessageDialog(this, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                try {
-                    new ManagersMain(context);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                new ManagersMain(context);
                 this.dispose();
-            }else if(username.equals("superadmin") && password.equals("admin123")){
+            } else if ("superadmin".equals(username) && "admin123".equals(password)) {
+                context.setCurrentManagerId(username);
                 new SuperAdminPage(context);
                 this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
-    private boolean authenticate(String username, String password) {
+    private String authenticateAndGetId(String username, String password) {
         try (BufferedReader reader = new BufferedReader(new FileReader("managers.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 7 &&
-                        parts[1].trim().equals(username) &&
-                        parts[2].trim().equals(password) &&
-                        parts[6].trim().equals("MANAGER")) {
-                    return true;
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 6
+                        && parts[1].trim().equals(username)
+                        && parts[2].trim().equals(password)
+                        && "MANAGER".equalsIgnoreCase(parts[6].trim())) {
+                    return parts[0].trim();
                 }
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error reading managers file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
+            JOptionPane.showMessageDialog(this,
+                    "Error reading managers file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        return false;
+        return null;
     }
 }
