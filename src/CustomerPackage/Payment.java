@@ -1,9 +1,6 @@
 package CustomerPackage;
 
 import java.util.Date;
-
-import java.util.Date;
-
 public class Payment {
     private String paymentId;
     private String orderId;

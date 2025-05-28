@@ -28,6 +28,7 @@ public class ManagerManageSalesman extends JFrame {
     private AppContext context;
 
     public ManagerManageSalesman(AppContext context) {
+        this.salesmanManagement = context.getSalesmanManagement();
         this.context = context;
         setContentPane(panel1);
         setTitle("Manage Salesmen");

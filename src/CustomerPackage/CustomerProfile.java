@@ -4,9 +4,16 @@ import MainPackage.AppContext;
 import CarPackage.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 public class CustomerProfile extends JFrame{
     private JPanel panel1;
@@ -19,6 +26,7 @@ public class CustomerProfile extends JFrame{
     private final String customerId;
     private final AppContext context;
     private DefaultTableModel tableModel;
+    private CarManagement carManagement;
 
     public CustomerProfile(AppContext context, String customerId) {
         if (context == null || customerId == null) {
@@ -27,6 +35,7 @@ public class CustomerProfile extends JFrame{
         this.context = context;
         this.customerId = customerId;
         this.customerManagement = context.getCustomerManagement();
+        this.carManagement = context.getCarManagement();
         initUI();
     }
 
@@ -94,58 +103,84 @@ public class CustomerProfile extends JFrame{
 
         assert ViewPurchaseHistories != null;
         ViewPurchaseHistories.addActionListener(e -> {
-            List<Order> customerOrders = customerManagement.listOrdersByCustomer(customerId);
-            if (customerOrders.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No purchase history found!", "Purchase History", JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-            String[] columnNames = {"Order ID", "Car ID", "Brand", "Model", "Status", "Photo Path", "Price"};
-            DefaultTableModel historyTableModel = new DefaultTableModel(columnNames, 0) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
+            try {
+                String rawId = customerId.startsWith("C-")
+                        ? customerId.substring(2)
+                        : customerId;
+                Customer c = customerManagement.findById(rawId);
+                String username = c.getUsername();
+                Path paymentsPath = Paths.get("payments.txt");
+                if (!Files.exists(paymentsPath)) {
+                    JOptionPane.showMessageDialog(this,
+                            "No payment records found!",
+                            "Purchase History",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
                 }
-            };
-            for (Order order : customerOrders) {
-                String brand = "N/A";
-                String model = "N/A";
-                String photoPath = "N/A";
-                double price = 0.0;
-                if (order.getCarId() != null) {
-                    try {
-                        Car car = customerManagement.carManagement.getCar(order.getCarId());
-                        if (car != null) {
-                            brand = car.getBrand();
-                            model = car.getModel();
-                            photoPath = car.getPhotoPath();
-                            price = car.getPrice();
-                        }
-                    } catch (Exception ex) {
-                        brand = "Car Not Found";
-                        model = "Car Not Found";
-                        photoPath = "N/A";
-                    }
-                }
-                historyTableModel.addRow(new Object[]{
-                        order.getOrderId(),
-                        order.getCarId(),
-                        brand,
-                        model,
-                        order.getStatus(),
-                        photoPath,
-                        String.format("$%.2f", price)
-                });
-            }
-            tableModel.setDataVector(historyTableModel.getDataVector(),
-                    new Vector<>(List.of(columnNames)));
-            int totalOrders = customerOrders.size();
-            long paidOrders = customerOrders.stream().filter(o -> "PAID".equals(o.getStatus())).count();
-            long confirmedOrders = customerOrders.stream().filter(o -> "CONFIRMED".equals(o.getStatus())).count();
+                List<Payment> allPayments = Files.readAllLines(paymentsPath).stream()
+                        .map(Payment::fromCSV)
+                        .filter(Objects::nonNull)
+                        .toList();
+                List<Payment> userPayments = allPayments.stream()
+                        .filter(p -> {
+                            Order o = customerManagement.findOrder(p.getOrderId());
+                            return o != null && username.equals(o.getUsername());
+                        })
+                        .toList();
 
-            JOptionPane.showMessageDialog(this,
-                    String.format("Purchase History Loaded!\nTotal Orders: %d | Paid: %d | Confirmed: %d",
-                            totalOrders, paidOrders, confirmedOrders),
-                    "Purchase History", JOptionPane.INFORMATION_MESSAGE);
+                if (userPayments.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "No purchase history found!",
+                            "Purchase History",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                String[] cols = {
+                        "Order ID", "Car ID", "Brand", "Model",
+                        "Status", "Price", "Payment ID"
+                };
+
+                DefaultTableModel model = new DefaultTableModel(cols, 0) {
+                    @Override public boolean isCellEditable(int r, int c) { return false; }
+                };
+
+                for (Payment p : userPayments) {
+                    Order o = customerManagement.findOrder(p.getOrderId());
+                    String carId = o.getCarId();
+                    Car car = carManagement.getCar(carId);
+
+                    String brand     = car  != null ? car.getBrand()     : "N/A";
+                    String modelName = car  != null ? car.getModel()     : "N/A";
+                    double price     = car  != null ? car.getPrice()     : 0.0;
+
+                    model.addRow(new Object[]{
+                            o.getOrderId(),
+                            carId,
+                            brand,
+                            modelName,
+                            o.getStatus(),
+                            String.format("$%.2f", price),
+                            p.getPaymentId()
+                    });
+                }
+                JTable table = new JTable(model);
+                table.setAutoCreateRowSorter(true);
+                JScrollPane scroll = new JScrollPane(table);
+                scroll.setPreferredSize(new Dimension(700, 300));
+                JOptionPane.showMessageDialog(
+                        this,
+                        scroll,
+                        "Your Purchase History",
+                        JOptionPane.PLAIN_MESSAGE
+                );
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Failed to load purchase history: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         });
     }
 }
