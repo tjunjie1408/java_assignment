@@ -65,8 +65,6 @@ public class ManagersMain extends JFrame{
                     actions[0]
             );
             if (action == null) return;
-
-            // 处理删除
             if ("Delete Profile".equals(action)) {
                 int confirm = JOptionPane.showConfirmDialog(
                         this,
@@ -95,10 +93,8 @@ public class ManagersMain extends JFrame{
                         );
                     }
                 }
-                return;  // 退出，不继续执行下面的更新逻辑
+                return;
             }
-
-            // 对于更新字段，先输入新值
             String newValue = JOptionPane.showInputDialog(
                     this,
                     "Enter new " + action + ":",
@@ -114,8 +110,6 @@ public class ManagersMain extends JFrame{
                 );
                 return;
             }
-
-            // 根据选择更新对象
             switch (action) {
                 case "Username" -> m.setUsername(newValue.trim());
                 case "Password" -> m.setPassword(newValue.trim());
@@ -131,8 +125,6 @@ public class ManagersMain extends JFrame{
                     return;
                 }
             }
-
-            // 持久化更新
             try {
                 boolean ok = managerManagement.updateManager(m);
                 if (ok) {
@@ -172,8 +164,6 @@ public class ManagersMain extends JFrame{
         paymentAndFeedbackAnalysisButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Payment and Feedback Analysis clicked");
             try {
-                // --- PAYMENTS ---
-                // Read and parse payments.txt
                 List<Payment> payments = new ArrayList<>();
                 Path payPath = Paths.get("payments.txt");
                 if (Files.exists(payPath)) {
@@ -182,8 +172,6 @@ public class ManagersMain extends JFrame{
                         if (p != null) payments.add(p);
                     }
                 }
-
-                // Build payments table (no Date column)
                 String[] payCols = {"Payment ID", "Order ID", "Amount"};
                 DefaultTableModel payModel = new DefaultTableModel(payCols, 0) {
                     @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -201,8 +189,6 @@ public class ManagersMain extends JFrame{
                 payScroll.setBorder(BorderFactory.createTitledBorder("Payment Records"));
                 payScroll.setPreferredSize(new Dimension(600, 200));
 
-                // --- FEEDBACK ---
-                // Read and parse feedback.txt
                 List<Feedback> feedbacks = new ArrayList<>();
                 Path fbPath = Paths.get("feedback.txt");
                 if (Files.exists(fbPath)) {
@@ -211,17 +197,16 @@ public class ManagersMain extends JFrame{
                         if (f != null) feedbacks.add(f);
                     }
                 }
-
-                // Build feedback table
                 String[] fbCols = {"Feedback ID", "Order ID", "Rating", "Comment"};
                 DefaultTableModel fbModel = new DefaultTableModel(fbCols, 0) {
                     @Override public boolean isCellEditable(int r, int c) { return false; }
                 };
                 for (Feedback f : feedbacks) {
+                    String ratingStr = String.format("%.1f", (double) f.getRating());
                     fbModel.addRow(new Object[]{
                             f.getFeedbackId(),
                             f.getOrderId(),
-                            f.getRating(),
+                            ratingStr,
                             f.getComment()
                     });
                 }
@@ -230,8 +215,6 @@ public class ManagersMain extends JFrame{
                 JScrollPane fbScroll = new JScrollPane(fbTable);
                 fbScroll.setBorder(BorderFactory.createTitledBorder("Feedback Records"));
                 fbScroll.setPreferredSize(new Dimension(600, 200));
-
-                // --- COMBINE AND SHOW ---
                 JPanel panel = new JPanel();
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 panel.add(payScroll);

@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 public class Customer extends User {
     private String customerId;
     private List<String> purchaseHistory = new ArrayList<>();
-    private String preferredPaymentMethod;
-    private String preferredContactMethod;
 
     public Customer(String username, String password, String email, String phoneNumber) {
         super(username, password, email, phoneNumber, UserRole.CUSTOMER);
@@ -47,22 +45,6 @@ public class Customer extends User {
     }
     public void setRole(UserRole role) {
         this.role = role;
-    }
-
-    public String getPreferredPaymentMethod() {
-        return preferredPaymentMethod;
-    }
-
-    public void setPreferredPaymentMethod(String method) {
-        this.preferredPaymentMethod = method != null ? method : "";
-    }
-
-    public String getPreferredContactMethod() {
-        return preferredContactMethod;
-    }
-
-    public void setPreferredContactMethod(String method) {
-        this.preferredContactMethod = method != null ? method : "";
     }
 
     @Override

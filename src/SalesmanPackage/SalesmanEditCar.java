@@ -61,14 +61,14 @@ public class SalesmanEditCar extends JFrame {
                 if (newStatus != null) {
                     salesmanManagement.updateCarStatus(carId, newStatus);
                     loadCarData();
-                    JOptionPane.showMessageDialog(SalesmanEditCar.this, "Car status updated successfully!");
+                    JOptionPane.showMessageDialog(SalesmanEditCar.this, "Car status updated successfully! " +
+                            "Please remind customer for paying! " + newStatus );
                 }
             } else {
                 JOptionPane.showMessageDialog(SalesmanEditCar.this, "Please select a car to update!");
             }
         });
 
-        // Edit later
         paymentServiceButton.addActionListener(e -> {
             int selectedRow = CarTable.getSelectedRow();
             if (selectedRow == -1) {
@@ -89,7 +89,7 @@ public class SalesmanEditCar extends JFrame {
                 showMessage("Order is not in CONFIRMED status, cannot collect payment.");
                 return;
             }
-            // Collect payment
+
             double amount = carManagement.getCar(order.getCarId()).getPrice();
             try {
                 Payment payment = customerManagement.makePayment(orderId, amount);

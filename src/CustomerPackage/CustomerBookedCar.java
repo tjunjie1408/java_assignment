@@ -49,7 +49,8 @@ public class CustomerBookedCar extends JFrame {
                 String carId = (String) tableModel.getValueAt(selectedRow, 0);
                 try {
                     Order order = customerManagement.placeOrder(customerId, carId);
-                    JOptionPane.showMessageDialog(this, "Order placed successfully! Order ID: " + order.getOrderId());
+                    JOptionPane.showMessageDialog(this, "Order placed successfully! Order ID: " + order.getOrderId()
+                            + "Please wait for the salesperson to confirm the order.");
                     loadCarData();
                 } catch (IllegalStateException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -76,7 +77,8 @@ public class CustomerBookedCar extends JFrame {
                 double amount = order.getCarId() != null ? customerManagement.carManagement.getCar(order.getCarId()).getPrice() : 0.0;
                 try {
                     Payment payment = customerManagement.makePayment(selectedOrderId, amount);
-                    JOptionPane.showMessageDialog(this, "Payment successful! Payment ID: " + payment.getPaymentId());
+                    JOptionPane.showMessageDialog(this, "Payment successful! Payment ID: " + payment.getPaymentId()
+                            + "Thank you for your payment!");
                     loadCarData();
                 } catch (IllegalStateException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -85,35 +87,87 @@ public class CustomerBookedCar extends JFrame {
         });
 
         feedbackButton.addActionListener(e -> {
-            String username = customerManagement.findById(customerId).getUsername();
+
+            Customer c = customerManagement.findById(
+                    customerId.startsWith("C-") ? customerId.substring(2) : customerId
+            );
+            String username = c.getUsername();
+
             List<Order> customerOrders = customerManagement.getCustomerOrdersByUsername(username);
             List<Order> feedbackOrders = customerOrders.stream()
-                    .filter(o -> "PAID".equals(o.getStatus()))
+                    .filter(o -> "PAID".equalsIgnoreCase(o.getStatus()))
                     .toList();
+
             if (feedbackOrders.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No orders to provide feedback for!");
+                JOptionPane.showMessageDialog(this,
+                        "No orders to provide feedback for!",
+                        "Feedback", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            String[] orderIds = feedbackOrders.stream().map(Order::getOrderId).toArray(String[]::new);
-            String selectedOrderId = (String) JOptionPane.showInputDialog(this, "Select Order for Feedback:", "Feedback",
-                    JOptionPane.QUESTION_MESSAGE, null, orderIds, orderIds[0]);
-            if (selectedOrderId != null) {
-                String comment = JOptionPane.showInputDialog(this, "Enter your feedback comment:");
-                if (comment != null && !comment.trim().isEmpty()) {
-                    try {
-                        int rating = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter rating (1-5):"));
-                        if (rating < 1 || rating > 5) {
-                            JOptionPane.showMessageDialog(this, "Rating must be between 1 and 5!", "Error", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        Feedback feedback = customerManagement.submitFeedback(selectedOrderId, customerId, rating, comment);
-                        JOptionPane.showMessageDialog(this, "Feedback submitted successfully!");
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Rating must be a number!", "Error", JOptionPane.ERROR_MESSAGE);
-                    } catch (IllegalStateException ex) {
-                        JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+
+            String[] orderIds = feedbackOrders.stream()
+                    .map(Order::getOrderId)
+                    .toArray(String[]::new);
+            String selectedOrderId = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select Order for Feedback:",
+                    "Feedback",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    orderIds,
+                    orderIds[0]
+            );
+            if (selectedOrderId == null) return;
+
+            String comment = JOptionPane.showInputDialog(
+                    this,
+                    "Enter your feedback comment:",
+                    "Feedback Comment",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+            if (comment == null || comment.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Comment cannot be empty!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String ratingStr = JOptionPane.showInputDialog(
+                    this,
+                    "Enter rating between 1.0 and 5.0: ",
+                    "Feedback Rating",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+            if (ratingStr == null) return;
+
+            try {
+                double ratingVal = Double.parseDouble(ratingStr.trim());
+                if (ratingVal < 1.0 || ratingVal > 5.0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Rating must be between 1.0 and 5.0!",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+                int rating = (int) Math.round(ratingVal);
+                Feedback feedback = customerManagement.submitFeedback(
+                        selectedOrderId,
+                        username,
+                        rating,
+                        comment.trim()
+                );
+
+                JOptionPane.showMessageDialog(this,
+                        "Feedback submitted successfully! ID: " + feedback.getFeedbackId(),
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Rating must be a valid number!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalStateException ex) {
+                JOptionPane.showMessageDialog(this,
+                        ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
