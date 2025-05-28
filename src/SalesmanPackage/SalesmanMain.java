@@ -3,6 +3,7 @@ package SalesmanPackage;
 import CarPackage.CarManagement;
 import CustomerPackage.CustomerManagement;
 import MainPackage.AppContext;
+import MainPackage.IdShortenerRenderer;
 import MainPackage.LoginPage;
 
 import javax.swing.*;
@@ -72,6 +73,7 @@ public class SalesmanMain extends JFrame{
             new SalesmanEditCar(context ,salesmanId);
             this.dispose();
         });
+
         viewSalesRecordsButton.addActionListener(e -> {
             List<SalesRecord> recs = context
                         .getSalesmanManagement()
@@ -101,6 +103,8 @@ public class SalesmanMain extends JFrame{
             }
             JTable table = new JTable(m);
             table.setAutoCreateRowSorter(true);
+            table.getColumnModel().getColumn(1).setCellRenderer(new IdShortenerRenderer());
+            table.getColumnModel().getColumn(0).setCellRenderer(new IdShortenerRenderer());
                 JScrollPane scroll = new JScrollPane(table);
                 scroll.setPreferredSize(new Dimension(600, 300));
                 JOptionPane.showMessageDialog(

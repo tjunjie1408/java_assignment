@@ -3,6 +3,7 @@ package ManagerPackage;
 import CarPackage.*;
 import CustomerPackage.*;
 import MainPackage.AppContext;
+import MainPackage.IdShortenerRenderer;
 import SalesmanPackage.*;
 import MainPackage.LoginPage;
 
@@ -185,6 +186,8 @@ public class ManagersMain extends JFrame{
                 }
                 JTable payTable = new JTable(payModel);
                 payTable.setAutoCreateRowSorter(true);
+                payTable.getColumnModel().getColumn(1).setCellRenderer(new IdShortenerRenderer());
+                payTable.getColumnModel().getColumn(0).setCellRenderer(new IdShortenerRenderer());
                 JScrollPane payScroll = new JScrollPane(payTable);
                 payScroll.setBorder(BorderFactory.createTitledBorder("Payment Records"));
                 payScroll.setPreferredSize(new Dimension(600, 200));
@@ -202,7 +205,7 @@ public class ManagersMain extends JFrame{
                     @Override public boolean isCellEditable(int r, int c) { return false; }
                 };
                 for (Feedback f : feedbacks) {
-                    String ratingStr = String.format("%.1f", (double) f.getRating());
+                    String ratingStr = String.format("%.1f", f.getRating());
                     fbModel.addRow(new Object[]{
                             f.getFeedbackId(),
                             f.getOrderId(),
@@ -212,6 +215,8 @@ public class ManagersMain extends JFrame{
                 }
                 JTable fbTable = new JTable(fbModel);
                 fbTable.setAutoCreateRowSorter(true);
+                fbTable.getColumnModel().getColumn(0).setCellRenderer(new IdShortenerRenderer());
+                fbTable.getColumnModel().getColumn(1).setCellRenderer(new IdShortenerRenderer());
                 JScrollPane fbScroll = new JScrollPane(fbTable);
                 fbScroll.setBorder(BorderFactory.createTitledBorder("Feedback Records"));
                 fbScroll.setPreferredSize(new Dimension(600, 200));

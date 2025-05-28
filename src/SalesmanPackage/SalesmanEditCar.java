@@ -2,6 +2,7 @@ package SalesmanPackage;
 import CarPackage.*;
 import CustomerPackage.*;
 import MainPackage.AppContext;
+import MainPackage.IdShortenerRenderer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -40,6 +41,7 @@ public class SalesmanEditCar extends JFrame {
 
         tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Model", "Color", "Price", "Photo Path", "Status", "Order ID"}, 0);
         CarTable.setModel(tableModel);
+        CarTable.getColumnModel().getColumn(7).setCellRenderer(new IdShortenerRenderer());
         CarTable.setDefaultRenderer(Object.class, new CarTableCellRenderer());
         CarTable.setRowHeight(150);
         loadCarData();

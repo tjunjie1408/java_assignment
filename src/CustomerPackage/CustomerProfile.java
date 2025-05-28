@@ -2,6 +2,8 @@ package CustomerPackage;
 
 import MainPackage.AppContext;
 import CarPackage.*;
+import MainPackage.IdShortenerRenderer;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -165,6 +167,8 @@ public class CustomerProfile extends JFrame{
                 }
                 JTable table = new JTable(model);
                 table.setAutoCreateRowSorter(true);
+                table.getColumnModel().getColumn(0).setCellRenderer(new IdShortenerRenderer());
+                table.getColumnModel().getColumn(6).setCellRenderer(new IdShortenerRenderer());
                 JScrollPane scroll = new JScrollPane(table);
                 scroll.setPreferredSize(new Dimension(700, 300));
                 JOptionPane.showMessageDialog(
