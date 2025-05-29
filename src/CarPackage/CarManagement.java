@@ -23,9 +23,20 @@ public class CarManagement {
             }
         }
         cars.add(car);
-        saveCars();
+        saveAllCars();
         System.out.println("Car added successfully!");
         return true;
+    }
+
+    public void saveAllCars() {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(CARS_FILE))) {
+            for (Car c : getAllCars()) {
+                w.write(c.toCSV());
+                w.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Car getCar(String carId) {

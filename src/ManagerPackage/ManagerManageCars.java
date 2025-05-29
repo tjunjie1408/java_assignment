@@ -33,7 +33,7 @@ public class ManagerManageCars extends JFrame {
         carManagement = new CarManagement();
 
         // Single-column table with custom renderer
-        carManagement = new CarManagement();
+        this.carManagement = context.getCarManagement();
         tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Model", "Color", "Price", "Photo Path", "Status"}, 0);
         CarTable.setDefaultRenderer(Object.class, new CarTableCellRenderer());
         CarTable.setModel(tableModel);
@@ -50,7 +50,9 @@ public class ManagerManageCars extends JFrame {
             Car newCar = dialog.getNewCar();
             if (newCar != null) {
                 carManagement.addCar(newCar);
-                loadCarData(); // Refresh table
+                AddCarDialog dlg = new AddCarDialog(this);
+                dlg.setVisible(true);
+                loadCarData();
             }
         });
 
@@ -152,7 +154,7 @@ public class ManagerManageCars extends JFrame {
             add(carIdField, gbc);
 
             // Model
-            gbc.gridx = 0; gbc.gridy = 2;
+            gbc.gridx = 0; gbc.gridy = 1;
             add(new JLabel("Brand:"), gbc);
             gbc.gridx = 1;
             brandField = new JTextField(15);
@@ -186,20 +188,20 @@ public class ManagerManageCars extends JFrame {
             photoField = new JTextField(15);
             add(photoField, gbc);
 
-            gbc.gridx = 2; gbc.gridy = 5;
+            gbc.gridx = 1; gbc.gridy = 6;
             JButton selectPhotoButton = new JButton("Select Photo");
             selectPhotoButton.addActionListener(e -> selectPhoto());
             add(selectPhotoButton, gbc);
 
             // Status
-            gbc.gridx = 0; gbc.gridy = 6;
+            gbc.gridx = 0; gbc.gridy = 7;
             add(new JLabel("Status:"), gbc);
             gbc.gridx = 1;
             statusField = new JTextField(15);
             add(statusField, gbc);
 
             // OK Button
-            gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 2;
+            gbc.gridx = 0; gbc.gridy = 8; gbc.gridwidth = 2;
             JButton okButton = new JButton("OK");
             okButton.addActionListener(e -> {
                 addCar();
@@ -215,12 +217,11 @@ public class ManagerManageCars extends JFrame {
 
         private void selectPhoto() {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setCurrentDirectory(new File("src/resources/CarsImage"));
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                String relativePath = "resources/CarsImage/" + selectedFile.getName();
-                photoField.setText(relativePath);
+                File f = fileChooser.getSelectedFile();
+                photoField.setText(f.getAbsolutePath());
             }
         }
 
@@ -237,7 +238,6 @@ public class ManagerManageCars extends JFrame {
                 JOptionPane.showMessageDialog(this, "All fields except photo path are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             double price;
             try {
                 price = Double.parseDouble(priceStr);
@@ -249,7 +249,6 @@ public class ManagerManageCars extends JFrame {
                 JOptionPane.showMessageDialog(this, "Price must be a valid number!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             Car newCar = new Car(carId, brand, model, color, price, photoPath, status);
             if (carManagement.addCar(newCar)) {
                 dispose();
@@ -266,7 +265,6 @@ public class ManagerManageCars extends JFrame {
         private JTextField valueField;
         private JButton selectPhotoButton, updateButton, cancelButton;
 
-        // 可更新的字段列表
         private static final String[] FIELDS = {
                 "Brand", "Model", "Color", "Price", "Status", "Photo Path"
         };

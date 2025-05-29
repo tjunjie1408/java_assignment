@@ -22,6 +22,7 @@ public class CustomerRegister extends JFrame {
 
     public CustomerRegister(AppContext context) {
         this.context = context;
+        this.customerManagement = context.getCustomerManagement();
         initUI();
     }
 

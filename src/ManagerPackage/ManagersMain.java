@@ -44,18 +44,25 @@ public class ManagersMain extends JFrame{
         setLocationRelativeTo(null);
         setVisible(true);
         manageManagerProfileButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Manage Manager Profile clicked");
             String managerId = context.getCurrentManagerId();
             Manager m = managerManagement.findById(managerId);
             if (m == null) {
                 JOptionPane.showMessageDialog(this,
                         "Current manager information not loaded, please log in again.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            String[] actions = {"Username", "Password", "Email", "Phone", "Delete Profile"};
+            String profileInfo =
+                    "Username: " + m.getUsername() + "\n" +
+                            "Email:    " + m.getEmail()    + "\n" +
+                            "Phone:    " + m.getPhoneNumber();
+            JOptionPane.showMessageDialog(this,
+                    profileInfo,
+                    "Your Profile",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            String[] actions = {"Edit Username", "Edit Password", "Edit Email", "Edit Phone", "Delete Profile"};
             String action = (String) JOptionPane.showInputDialog(
                     this,
                     "Select action:",
@@ -66,6 +73,7 @@ public class ManagersMain extends JFrame{
                     actions[0]
             );
             if (action == null) return;
+
             if ("Delete Profile".equals(action)) {
                 int confirm = JOptionPane.showConfirmDialog(
                         this,
@@ -77,76 +85,69 @@ public class ManagersMain extends JFrame{
                 if (confirm == JOptionPane.YES_OPTION) {
                     boolean deleted = managerManagement.deleteManager(managerId);
                     if (deleted) {
-                        JOptionPane.showMessageDialog(
-                                this,
+                        JOptionPane.showMessageDialog(this,
                                 "Your profile has been deleted.",
                                 "Deleted",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
+                                JOptionPane.INFORMATION_MESSAGE);
                         new LoginPage(context);
                         dispose();
                     } else {
-                        JOptionPane.showMessageDialog(
-                                this,
+                        JOptionPane.showMessageDialog(this,
                                 "Failed to delete profile. Please try again.",
                                 "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 return;
             }
+
+            String field = action.replace("Edit ", "");  // 得到 "Username"/"Password"/...
             String newValue = JOptionPane.showInputDialog(
                     this,
-                    "Enter new " + action + ":",
-                    "Edit " + action,
+                    "Enter new " + field + ":",
+                    action,
                     JOptionPane.PLAIN_MESSAGE
             );
             if (newValue == null || newValue.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        action + " cannot be empty!",
+                JOptionPane.showMessageDialog(this,
+                        field + " cannot be empty!",
                         "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            switch (action) {
+
+            switch (field) {
                 case "Username" -> m.setUsername(newValue.trim());
                 case "Password" -> m.setPassword(newValue.trim());
                 case "Email"    -> m.setEmail(newValue.trim());
                 case "Phone"    -> m.setPhoneNumber(newValue.trim());
                 default -> {
-                    JOptionPane.showMessageDialog(
-                            this,
+                    JOptionPane.showMessageDialog(this,
                             "Unknown action: " + action,
                             "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }
             try {
                 boolean ok = managerManagement.updateManager(m);
                 if (ok) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            action + " updated successfully!",
+                    JOptionPane.showMessageDialog(this,
+                            field + " updated successfully!",
                             "Success",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
+                            JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     throw new IOException("Failed to write managers.txt");
                 }
             } catch (IOException ioEx) {
-                JOptionPane.showMessageDialog(
-                        this,
+                JOptionPane.showMessageDialog(this,
                         "File write failed: " + ioEx.getMessage(),
                         "I/O Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
+
+
         manageSalesmanProfileButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Manage Salesman Profile clicked");
             new ManagerManageSalesman(context);

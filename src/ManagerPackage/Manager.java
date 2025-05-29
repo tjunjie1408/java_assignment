@@ -54,8 +54,8 @@ public class Manager extends User {
     @Override
     public String toCSV() {
         return String.join(",",
-                id, username, password, email, status.toString(), role.toString(),
-                department, position, getPhoneNumber(), officeLocation, employeeId, accessLevel,
+                id, username, password, email, getPhoneNumber(), status.toString(), role.toString(),
+                department, position, officeLocation, employeeId, accessLevel,
                 String.join(";", managedSalesmen),
                 String.join(";", approvalHistory));
     }

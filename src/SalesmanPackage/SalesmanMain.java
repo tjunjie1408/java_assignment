@@ -9,6 +9,7 @@ import MainPackage.LoginPage;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 
 public class SalesmanMain extends JFrame{
@@ -32,39 +33,108 @@ public class SalesmanMain extends JFrame{
         setVisible(true);
 
         editProfileButton.addActionListener(e -> {
-            String[] options = {"Username", "Password", "Email", "Phone"};
-            String field = (String) JOptionPane.showInputDialog(
+            Salesman s = context.getSalesmanManagement().findById(salesmanId);
+            if (s == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Your profile could not be loaded. Please log in again.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String info = String.format(
+                    "Username: %s%nEmail:    %s%nPhone:    %s",
+                    s.getUsername(),
+                    s.getEmail(),
+                    s.getPhoneNumber()
+            );
+            JOptionPane.showMessageDialog(this,
+                    info,
+                    "Your Profile",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            String[] options = {
+                    "Edit Username",
+                    "Edit Password",
+                    "Edit Email",
+                    "Edit Phone",
+                    "Delete Profile"
+            };
+            String action = (String) JOptionPane.showInputDialog(
                     this,
-                    "Select field to edit:",
-                    "Edit Profile",
+                    "Select action:",
+                    "Manage Profile",
                     JOptionPane.QUESTION_MESSAGE,
                     null,
                     options,
                     options[0]
             );
-            if (field == null) return;
+            if (action == null) return;
+
+            if ("Delete Profile".equals(action)) {
+                int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to DELETE your profile? This cannot be undone.",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                if (confirm == JOptionPane.YES_OPTION) {
+                    boolean ok = context.getSalesmanManagement().deleteSalesman(s.getUsername());
+                    if (ok) {
+                        JOptionPane.showMessageDialog(this,
+                                "Your profile has been deleted.",
+                                "Deleted", JOptionPane.INFORMATION_MESSAGE);
+                        new LoginPage(context);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Failed to delete profile.",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                return;
+            }
+
+            String field = action.replace("Edit ", "");  // yields "Username", "Password", etc.
             String newValue = JOptionPane.showInputDialog(
                     this,
                     "Enter new " + field + ":",
-                    "Edit " + field,
+                    action,
                     JOptionPane.PLAIN_MESSAGE
             );
             if (newValue == null || newValue.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, field + " cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        field + " cannot be empty!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            try {
-                Salesman s = context.getSalesmanManagement().findById(salesmanId);
-                switch (field) {
-                    case "Username" -> s.setUsername(newValue.trim());
-                    case "Password" -> s.setPassword(newValue.trim());
-                    case "Email"    -> s.setEmail(newValue.trim());
-                    case "Phone"    -> s.setPhoneNumber(newValue.trim());
+
+            switch (field) {
+                case "Username" -> s.setUsername(newValue.trim());
+                case "Password" -> s.setPassword(newValue.trim());
+                case "Email"    -> s.setEmail(newValue.trim());
+                case "Phone"    -> s.setPhoneNumber(newValue.trim());
+                default -> {
+                    JOptionPane.showMessageDialog(this,
+                            "Unknown action: " + action,
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
-                context.getSalesmanManagement().updateSalesman(s);
-                JOptionPane.showMessageDialog(this, field + " updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            try {
+                boolean updated = context.getSalesmanManagement().updateSalesman(s);
+                if (updated) {
+                    JOptionPane.showMessageDialog(this,
+                            field + " updated successfully!",
+                            "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    throw new IOException("Failed to save changes");
+                }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Failed to update " + field + ": " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Failed to update " + field + ": " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

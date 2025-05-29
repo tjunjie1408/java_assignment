@@ -16,3 +16,10 @@
 2025-05-26T18:35:34.063037,1,RECORD_SALE,Sale recorded for order: b069bf75-824b-4c9e-a958-fce2d0444782
 2025-05-28T00:45:32.477915300,Jason,UPDATE,Salesman information updated
 2025-05-28T19:40:03.564563600,Jason,UPDATE,Salesman information updated
+2025-05-30T02:00:54.534744600,Adeline,ADD,New salesman added
+2025-05-30T02:01:41.493495100,Adeline,UPDATE,Salesman information updated
+2025-05-30T02:02:14.875421900,Adeline,DELETE,Salesman deleted
+2025-05-30T02:27:06.315442300,Adeline,ADD,New salesman added
+2025-05-30T02:29:24.359939300,Adeline,UPDATE,Salesman information updated
+2025-05-30T02:31:11.264131,SYSTEM,UPDATE_CAR_STATUS,Car status updated: C02 to BOOKED
+2025-05-30T03:24:54.481290800,SYSTEM,UPDATE_CAR_STATUS,Car status updated: C03 to BOOKED

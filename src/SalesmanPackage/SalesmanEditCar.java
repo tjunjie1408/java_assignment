@@ -74,7 +74,7 @@ public class SalesmanEditCar extends JFrame {
         paymentServiceButton.addActionListener(e -> {
             int selectedRow = CarTable.getSelectedRow();
             if (selectedRow == -1) {
-                showMessage("Please select a car to collect payment for!");
+                showMessage("Please select a car to finalize sale for!");
                 return;
             }
             String orderId = (String) tableModel.getValueAt(selectedRow, 7);
@@ -87,22 +87,22 @@ public class SalesmanEditCar extends JFrame {
                 showMessage("Order not found!");
                 return;
             }
-            if (!"CONFIRMED".equals(order.getStatus())) {
-                showMessage("Order is not in CONFIRMED status, cannot collect payment.");
+            if (!"PAID".equalsIgnoreCase(order.getStatus())) {
+                showMessage("Order must be in PAID status to finalize sale.");
                 return;
             }
-
-            double amount = carManagement.getCar(order.getCarId()).getPrice();
             try {
-                Payment payment = customerManagement.makePayment(orderId, amount);
-                showMessage("Payment collected! Payment ID: " + payment.getPaymentId());
-                salesmanManagement.updateCarStatus(order.getCarId(), "PAID");
+                order.setStatus("COMPLETED");
+                customerManagement.saveOrders();
+                salesmanManagement.updateCarStatus(order.getCarId(), "Sold");
+
+                showMessage("Sale finalized! Order marked COMPLETED and car marked Sold.");
                 loadCarData();
             } catch (IllegalStateException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
 
         salesRecordButton.addActionListener(e -> {
             int selectedRow = CarTable.getSelectedRow();

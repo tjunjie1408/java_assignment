@@ -104,7 +104,7 @@ public class CustomerManagement {
     // Make a payment
     public Payment makePayment(String orderId, double amount) {
         Order order = findOrder(orderId);
-        if (order == null || !"CONFIRMED".equals(order.getStatus())) {
+        if (order == null || !"CONFIRMED".equalsIgnoreCase(order.getStatus())) {
             throw new IllegalStateException("Order not ready for payment");
         }
         String paymentId = UUID.randomUUID().toString();
@@ -112,11 +112,6 @@ public class CustomerManagement {
         appendToFile(PAYMENTS_FILE, payment.toCSV());
         order.setStatus("PAID");
         saveOrders();
-        Car car = carManagement.getCar(order.getCarId());
-        if (car != null) {
-            car.setStatus("Sold");
-            carManagement.updateCar(car.getCarId(), car);
-        }
         log("PAYMENT", orderId + ", payment=" + paymentId);
         return payment;
     }

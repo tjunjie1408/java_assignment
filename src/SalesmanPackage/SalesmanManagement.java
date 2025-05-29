@@ -133,14 +133,14 @@ public class SalesmanManagement {
     // Confirm an order
     public void confirmOrder(String orderId, String salesmanId) {
         Order order = customerManagement.findOrder(orderId);
-        if (order == null || !"PENDING".equals(order.getStatus())) {
-            throw new IllegalStateException("Cannot confirm order");
+        if (order == null || !"PENDING".equalsIgnoreCase(order.getStatus())) {
+            throw new IllegalStateException("Cannot confirm: order not in PENDING.");
         }
         order.setStatus("CONFIRMED");
         Car car = carManagement.getCar(order.getCarId());
         if (car != null) {
-            car.setStatus("Booked");
-            carManagement.updateCar(car.getCarId(),car);
+            car.setStatus("BOOKED");
+            carManagement.updateCar(car.getCarId(), car);
         }
         customerManagement.saveOrders();
         logActivity(salesmanId, "CONFIRM_ORDER", "Order confirmed: " + orderId);
@@ -149,21 +149,22 @@ public class SalesmanManagement {
     // Update car status
     public void updateCarStatus(String carId, String newStatus) {
         Car car = carManagement.getCar(carId);
-        if (car != null) {
-            car.setStatus(newStatus);
-            carManagement.updateCar(car.getCarId(), car);
-            List<Order> orders = customerManagement.getOrdersByCarId(carId);
-            for (Order order : orders) {
-                switch (newStatus) {
-                    case "BOOKED" -> order.setStatus("CONFIRMED");
-                    case "PAID" -> order.setStatus("PAID");
-                    case "CANCELLED" -> order.setStatus("CANCELLED");
-                    case null, default -> order.setStatus("PENDING");
-                }
+        if (car == null) return;
+        car.setStatus(newStatus);
+        carManagement.updateCar(carId, car);
+        List<Order> orders = customerManagement.getOrdersByCarId(carId);
+        for (Order order : orders) {
+            switch (newStatus) {
+                case "BOOKED"    -> order.setStatus("CONFIRMED");
+                case "PAID"      -> order.setStatus("PAID");
+                case "Sold"      -> order.setStatus("COMPLETED");
+                case "CANCELLED" -> order.setStatus("CANCELLED");
+                default          -> order.setStatus("PENDING");
             }
-            customerManagement.saveOrders();
-            logActivity("SYSTEM", "UPDATE_CAR_STATUS", "Car status updated: " + carId + " to " + newStatus);
         }
+        customerManagement.saveOrders();
+        logActivity("SYSTEM", "UPDATE_CAR_STATUS",
+                "Car status updated: " + carId + " → " + newStatus);
     }
 
     // Record a sale

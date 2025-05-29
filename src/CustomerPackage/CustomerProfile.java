@@ -3,6 +3,7 @@ package CustomerPackage;
 import MainPackage.AppContext;
 import CarPackage.*;
 import MainPackage.IdShortenerRenderer;
+import MainPackage.LoginPage;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -58,42 +59,99 @@ public class CustomerProfile extends JFrame{
         });
 
         assert EditProfile != null;
-
         EditProfile.addActionListener(e -> {
-            String[] options = {"Username", "Password", "Email", "Phone"};
-            String field = (String) JOptionPane.showInputDialog(
+            String rawId = customerId.startsWith("C-") ? customerId.substring(2) : customerId;
+            Customer c = customerManagement.findById(rawId);
+            if (c == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Your profile could not be loaded. Please log in again.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String info = String.format(
+                    "Username: %s%nEmail:    %s%nPhone:    %s",
+                    c.getUsername(),
+                    c.getEmail(),
+                    c.getPhoneNumber()
+            );
+            JOptionPane.showMessageDialog(this,
+                    info,
+                    "Your Profile",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            String[] options = {"Edit Username", "Edit Password", "Edit Email", "Edit Phone", "Delete Profile"};
+            String action = (String) JOptionPane.showInputDialog(
                     this,
-                    "Select field to edit:",
-                    "Edit Profile",
+                    "Select action:",
+                    "Manage Profile",
                     JOptionPane.QUESTION_MESSAGE,
                     null,
                     options,
                     options[0]
             );
-            if (field == null) return;
+            if (action == null) return;
+
+            if ("Delete Profile".equals(action)) {
+                int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to DELETE your profile? This cannot be undone.",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                if (confirm == JOptionPane.YES_OPTION) {
+                    try {
+                        customerManagement.deleteCustomer(rawId);
+                        JOptionPane.showMessageDialog(this,
+                                "Your profile has been deleted.",
+                                "Deleted", JOptionPane.INFORMATION_MESSAGE);
+                        new LoginPage(context);
+                        dispose();
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Failed to delete profile: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                return;
+            }
+
+            String field = action.replace("Edit ", "");  // yields "Username"/"Password"/ etc.
             String newValue = JOptionPane.showInputDialog(
                     this,
                     "Enter new " + field + ":",
-                    "Edit " + field,
+                    action,
                     JOptionPane.PLAIN_MESSAGE
             );
             if (newValue == null || newValue.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, field + " cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        field + " cannot be empty!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
+            switch (field) {
+                case "Username": c.setUsername(newValue.trim()); break;
+                case "Password": c.setPassword(newValue.trim()); break;
+                case "Email":    c.setEmail(newValue.trim());    break;
+                case "Phone":    c.setPhoneNumber(newValue.trim()); break;
+                default:
+                    JOptionPane.showMessageDialog(this,
+                            "Unknown action: " + action,
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+
             try {
-                String rawId = customerId.startsWith("C-") ? customerId.substring(2) : customerId;
-                Customer c = customerManagement.findById(rawId);
-                switch (field) {
-                    case "Username" -> c.setUsername(newValue.trim());
-                    case "Password" -> c.setPassword(newValue.trim());
-                    case "Email"    -> c.setEmail(newValue.trim());
-                    case "Phone"    -> c.setPhoneNumber(newValue.trim());
-                }
                 customerManagement.updateCustomer(c);
-                JOptionPane.showMessageDialog(this, field + " updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        field + " updated successfully!",
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Failed to update " + field + ": " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Failed to update " + field + ": " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

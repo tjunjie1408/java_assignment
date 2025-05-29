@@ -55,28 +55,29 @@ public class Customer extends User {
                 getPassword(),
                 getEmail(),
                 getPhoneNumber(),
-                getStatus().name(),
-                getRole().name()
+                getStatus().name()
         );
     }
 
     public static Customer fromCSV(String csv) {
         String[] parts = csv.split(",", -1);
-        if (parts.length < 7) {
+        if (parts.length < 6) {
             throw new IllegalArgumentException("Invalid customer CSV: " + csv);
         }
-        // parts: 0=id,1=user,2=pass,3=email,4=phone,5=status,6=role
-        Customer c = new Customer(
-                parts[0].trim(),
-                parts[1].trim(),
-                parts[2].trim(),
-                parts[3].trim(),
-                parts[4].trim()
-        );
+
+        String id        = parts[0].trim();
+        String username  = parts[1].trim();
+        String password  = parts[2].trim();
+        String email     = parts[3].trim();
+        String phone     = parts[4].trim();
         String statusStr = parts[5].trim();
-        if (!statusStr.isEmpty()) c.setStatus(UserStatus.valueOf(statusStr));
-        String roleStr = parts[6].trim();
-        if (!roleStr.isEmpty()) c.setRole(UserRole.valueOf(roleStr));
+
+        Customer c = new Customer(id, username, password, email, phone);
+        if (!statusStr.isEmpty()) {
+            c.setStatus(UserStatus.valueOf(statusStr));
+        }
+        c.setRole(UserRole.CUSTOMER);
+
         return c;
     }
 }

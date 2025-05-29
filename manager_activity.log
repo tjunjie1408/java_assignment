@@ -1,3 +1,14 @@
 2025-05-19T23:13:38.144319,Jason,ADD,New manager added with id: 1
 2025-05-25T20:42:38.738259700,Jason,ADD,New manager added with id: 1
 2025-05-28T00:37:30.929263600,Jason,UPDATE,Manager info updated
+2025-05-29T21:50:06.110146700,Vera,ADD,New manager added with id: 2
+2025-05-30T02:04:08.143118900,Vera,UPDATE,Manager info updated
+2025-05-30T02:04:40.397088400,2,DELETE,Manager account deleted
+2025-05-30T02:08:06.369024500,Jason,UPDATE,Manager info updated
+2025-05-30T02:10:21.248285300,Vera,ADD,New manager added with id: 2
+2025-05-30T02:17:46.928794200,Victor,ADD,New manager added with id: 3
+2025-05-30T02:18:02.525564900,3,DELETE,Manager account deleted
+2025-05-30T02:19:20.335154400,victor,ADD,New manager added with id: 3
+2025-05-30T02:19:36.727801300,3,DELETE,Manager account deleted
+2025-05-30T02:19:56.815657500,victor,ADD,New manager added with id: 3
+2025-05-30T02:20:09.322371500,3,DELETE,Manager account deleted

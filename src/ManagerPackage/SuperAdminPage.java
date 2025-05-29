@@ -44,18 +44,26 @@ public class SuperAdminPage extends JFrame{
             }
 
             Manager newManager = new Manager(username, password, email, phoneNumber);
-            ManagerManagement managerManagement = ManagerManagement.getInstance();
-            if (managerManagement.addManager(newManager)) {
-                JOptionPane.showMessageDialog(this, "Manager added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
-                UsernameTextField.setText("");
-                PasswordField.setText("");
-                EmailTextField.setText("");
-                PhoneNumberTextField.setText("");
-                new ManagerLogin(context);
-                this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Username already exists", "Error", JOptionPane.ERROR_MESSAGE);
+            ManagerManagement mm = context.getManagerManagement();
+            boolean added = mm.addManager(newManager);
+            if (!added) {
+                JOptionPane.showMessageDialog(this,
+                        "Username already exists",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+            String newId = newManager.getId();
+            context.setCurrentManagerId(newId);
+            JOptionPane.showMessageDialog(this,
+                    "Manager added successfully! " + username,
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            UsernameTextField.setText("");
+            PasswordField.setText("");
+            EmailTextField.setText("");
+            PhoneNumberTextField.setText("");
+            new ManagerLogin(context);
+            dispose();
         });
     }
 }

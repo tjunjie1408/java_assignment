@@ -10,6 +10,7 @@ import CarPackage.*;
 import MainPackage.*;
 
 public class CustomerBookedCar extends JFrame {
+    private final CarManagement carManagement;
     private JPanel panel1;
     private JTextField SearchTextField;
     private JTable CarTable;
@@ -28,6 +29,7 @@ public class CustomerBookedCar extends JFrame {
             throw new IllegalArgumentException("AppContext cannot be null");
         }
         this.customerManagement = context.getCustomerManagement();
+        this.carManagement = context.getCarManagement();
         this.context = context;
         this.customerId = customerId;
 
@@ -61,28 +63,58 @@ public class CustomerBookedCar extends JFrame {
         });
 
         payButton.addActionListener(e -> {
-            List<Order> customerOrders = customerManagement.listOrdersByCustomer(customerId);
+            Customer c = customerManagement.findById(
+                    customerId.startsWith("C-") ? customerId.substring(2) : customerId
+            );
+            String username = c.getUsername();
+
+            List<Order> customerOrders = customerManagement.listOrdersByCustomer(username);
             List<Order> payableOrders = customerOrders.stream()
-                    .filter(o -> "CONFIRMED".equals(o.getStatus()))
+                    .filter(o -> "CONFIRMED".equalsIgnoreCase(o.getStatus()))
                     .toList();
+
             if (payableOrders.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No orders to pay!");
                 return;
             }
-            String[] orderIds = payableOrders.stream().map(Order::getOrderId).toArray(String[]::new);
-            String selectedOrderId = (String) JOptionPane.showInputDialog(this, "Select Order to Pay:", "Pay Order",
-                    JOptionPane.QUESTION_MESSAGE, null, orderIds, orderIds[0]);
-            if (selectedOrderId != null) {
-                Order order = payableOrders.stream().filter(o -> o.getOrderId().equals(selectedOrderId)).findFirst().get();
-                double amount = order.getCarId() != null ? customerManagement.carManagement.getCar(order.getCarId()).getPrice() : 0.0;
-                try {
-                    Payment payment = customerManagement.makePayment(selectedOrderId, amount);
-                    JOptionPane.showMessageDialog(this, "Payment successful! Payment ID: " + payment.getPaymentId()
-                            + "Thank you for your payment!");
-                    loadCarData();
-                } catch (IllegalStateException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
+
+            String[] orderIds = payableOrders.stream()
+                    .map(Order::getOrderId)
+                    .toArray(String[]::new);
+            String selectedOrderId = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select Order to Pay:",
+                    "Pay Order",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    orderIds,
+                    orderIds[0]
+            );
+            if (selectedOrderId == null) return;
+
+            Order order = payableOrders.stream()
+                    .filter(o -> o.getOrderId().equals(selectedOrderId))
+                    .findFirst().get();
+            double amount = context
+                    .getCarManagement()
+                    .getCar(order.getCarId())
+                    .getPrice();
+            try {
+                Payment payment = customerManagement.makePayment(selectedOrderId, amount);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Payment successful! Payment ID: " + payment.getPaymentId() +
+                                "\nThank you for your payment!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                loadCarData();
+            } catch (IllegalStateException ex) {
+                JOptionPane.showMessageDialog(this,
+                        ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
 
