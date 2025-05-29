@@ -157,7 +157,7 @@ public class SalesmanManagement {
             switch (newStatus) {
                 case "BOOKED"    -> order.setStatus("CONFIRMED");
                 case "PAID"      -> order.setStatus("PAID");
-                case "Sold"      -> order.setStatus("COMPLETED");
+                case "SOLD"      -> order.setStatus("COMPLETED");
                 case "CANCELLED" -> order.setStatus("CANCELLED");
                 default          -> order.setStatus("PENDING");
             }
