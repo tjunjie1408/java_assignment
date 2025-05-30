@@ -16,16 +16,8 @@ public class Payment {
 
     // Getters and setters
     public String getPaymentId() { return paymentId; }
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
-
     public String getOrderId() { return orderId; }
-    public void setOrderId(String orderId) { this.orderId = orderId; }
-
     public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
-
-    public Date getPaymentDate() { return paymentDate; }
-    public void setPaymentDate(Date paymentDate) { this.paymentDate = paymentDate; }
 
     public String toCSV() {
         return String.join(",",

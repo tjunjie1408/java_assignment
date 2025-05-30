@@ -1,7 +1,6 @@
 package CustomerPackage;
 
 import MainPackage.AppContext;
-
 import javax.swing.*;
 
 public class CustomerRegister extends JFrame {

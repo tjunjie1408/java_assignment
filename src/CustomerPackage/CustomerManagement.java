@@ -3,7 +3,6 @@ package CustomerPackage;
 import CarPackage.Car;
 import CarPackage.CarManagement;
 import UserPackage.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,29 +42,6 @@ public class CustomerManagement {
         saveAll();
         log("REGISTER", c.getUsername());
     }
-
-    public void approveCustomer(String username) {
-        Customer c = find(username);
-        c.setStatus(UserStatus.APPROVED);
-        saveAll();
-        log("APPROVE", username);
-    }
-
-    public void rejectCustomer(String username) {
-        Customer c = find(username);
-        c.setStatus(UserStatus.REJECTED);
-        saveAll();
-        log("REJECT", username);
-    }
-
-    public void updateProfile(String username, String phone, String email) {
-        Customer c = find(username);
-        c.setPhoneNumber(phone);
-        c.setEmail(email);
-        saveAll();
-        log("UPDATE", username);
-    }
-
     public Customer login(String username, String password) {
         for (Customer c : customers) {
             if (c.getUsername().equals(username) && c.getPassword().equals(password)) {
@@ -111,7 +87,6 @@ public class CustomerManagement {
         String paymentId = UUID.randomUUID().toString();
         Payment payment = new Payment(paymentId, orderId, amount, new Date());
         appendToFile(PAYMENTS_FILE, payment.toCSV());
-
         order.setStatus("PAID");
         saveOrders();
         order.setStatus("COMPLETED");
@@ -121,7 +96,6 @@ public class CustomerManagement {
             car.setStatus("SOLD");
             carManagement.updateCar(car.getCarId(), car);
         }
-
         log("PAYMENT_AND_COMPLETE", orderId + ", payment=" + paymentId);
         return payment;
     }
@@ -137,13 +111,6 @@ public class CustomerManagement {
         appendToFile(FEEDBACK_FILE, feedback.toCSV());
         log("FEEDBACK", customerId + ", order=" + orderId);
         return feedback;
-    }
-
-    private Customer find(String username) {
-        return customers.stream()
-                .filter(c -> c.getUsername().equals(username))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No such user: " + username));
     }
 
     public Order findOrder(String orderId) {
@@ -216,10 +183,6 @@ public class CustomerManagement {
             }
         }
         throw new NoSuchElementException("No such customer: " + id);
-    }
-
-    public List<Customer> getCustomers() {
-        return new ArrayList<>(customers);
     }
 
     public List<Order> listOrdersByCustomer(String username) {

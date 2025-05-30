@@ -5,15 +5,12 @@ import CustomerPackage.*;
 import MainPackage.AppContext;
 import MainPackage.IdShortenerRenderer;
 import MainPackage.TableExporter;
-import SalesmanPackage.*;
 import MainPackage.LoginPage;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -31,7 +28,6 @@ public class ManagersMain extends JFrame{
     private final CarManagement carManagement;
     private final CustomerManagement customerManagement;
     private final ManagerManagement managerManagement;
-    private SalesmanManagement salesmanManagement;
     private AppContext context;
 
     public ManagersMain(AppContext context) {
@@ -103,7 +99,7 @@ public class ManagersMain extends JFrame{
                 return;
             }
 
-            String field = action.replace("Edit ", "");  // 得到 "Username"/"Password"/...
+            String field = action.replace("Edit ", "");
             String newValue = JOptionPane.showInputDialog(
                     this,
                     "Enter new " + field + ":",

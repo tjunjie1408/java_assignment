@@ -5,7 +5,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
-import java.util.stream.Collectors;
 import CarPackage.*;
 import MainPackage.*;
 

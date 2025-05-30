@@ -28,14 +28,9 @@ public class Salesman extends User {
         this.id = id;
         this.salesId = "S-" + id;
     }
-    public String getSalesId() { return salesId; }
     public int getTotalSales() { return totalSales; }
     public void incrementSales() { this.totalSales++; }
-    public double getCommissionRate() { return commissionRate; }
-    public void setCommissionRate(double rate) { this.commissionRate = rate; }
     public String getManagerId() { return managerId; }
-    public void setManagerId(String managerId) { this.managerId = managerId; }
-    public List<String> getSalesHistory() { return salesHistory; }
     public void addSale(String saleId) { salesHistory.add(saleId); }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

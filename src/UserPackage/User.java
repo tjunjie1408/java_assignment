@@ -3,9 +3,6 @@ package UserPackage;
 import CustomerPackage.Customer;
 import ManagerPackage.Manager;
 import SalesmanPackage.Salesman;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 public abstract class User {
@@ -16,7 +13,6 @@ public abstract class User {
     protected String phoneNumber;
     protected UserStatus status;
     protected UserRole role;
-    protected LocalDateTime lastLogin;
     protected LocalDateTime createdAt;
 
     public User(String username, String password, String email, String phoneNumber, UserRole role) {
@@ -42,16 +38,10 @@ public abstract class User {
         this.email = email != null ? email : "";
     }
     public UserStatus getStatus() { return status; }
-    public UserRole getRole() { return role; }
-    public LocalDateTime getLastLogin() { return lastLogin; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
     public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
-
     public void setStatus(UserStatus status) { this.status = status; }
-    public void setLastLogin(LocalDateTime lastLogin) { this.lastLogin = lastLogin; }
 
-    // CSV conversion
     public abstract String toCSV();
     public static User fromCSV(String csv) {
         String[] parts = csv.split(",", -1);
@@ -63,7 +53,6 @@ public abstract class User {
             case CUSTOMER -> Customer.fromCSV(csv);
             case MANAGER -> Manager.fromCSV(csv);
             case SALESMAN -> Salesman.fromCSV(csv);
-            default -> throw new IllegalArgumentException("Invalid Role: " + role);
         };
     }
 }

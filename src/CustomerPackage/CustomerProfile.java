@@ -12,11 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
-import java.util.stream.Collectors;
 
 public class CustomerProfile extends JFrame{
     private JPanel panel1;
@@ -28,7 +25,6 @@ public class CustomerProfile extends JFrame{
     private final CustomerManagement customerManagement;
     private final String customerId;
     private final AppContext context;
-    private DefaultTableModel tableModel;
     private CarManagement carManagement;
 
     public CustomerProfile(AppContext context, String customerId) {
@@ -199,20 +195,16 @@ public class CustomerProfile extends JFrame{
                         "Order ID", "Car ID", "Brand", "Model",
                         "Status", "Price", "Payment ID"
                 };
-
                 DefaultTableModel model = new DefaultTableModel(cols, 0) {
                     @Override public boolean isCellEditable(int r, int c) { return false; }
                 };
-
                 for (Payment p : userPayments) {
                     Order o = customerManagement.findOrder(p.getOrderId());
                     String carId = o.getCarId();
                     Car car = carManagement.getCar(carId);
-
                     String brand     = car  != null ? car.getBrand()     : "N/A";
                     String modelName = car  != null ? car.getModel()     : "N/A";
                     double price     = car  != null ? car.getPrice()     : 0.0;
-
                     model.addRow(new Object[]{
                             o.getOrderId(),
                             carId,

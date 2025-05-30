@@ -3,11 +3,8 @@ import CarPackage.*;
 import CustomerPackage.*;
 import MainPackage.AppContext;
 import MainPackage.IdShortenerRenderer;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -32,7 +29,6 @@ public class SalesmanEditCar extends JFrame {
         this.salesmanManagement = context.getSalesmanManagement();
         this.customerManagement = context.getCustomerManagement();
         this.salesmanId = salesmanId;
-
         setContentPane(panel1);
         setTitle("Edit Car Status");
         setSize(800, 600);
@@ -122,14 +118,12 @@ public class SalesmanEditCar extends JFrame {
                 JOptionPane.showMessageDialog(this, "Order not found!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             if (!"COMPLETED".equalsIgnoreCase(order.getStatus())) {
                 JOptionPane.showMessageDialog(this,
                         "Order must be COMPLETED before recording sale.",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             String comment = JOptionPane.showInputDialog(
                     this,
                     "Enter comment for the sale:",
@@ -137,7 +131,6 @@ public class SalesmanEditCar extends JFrame {
                     JOptionPane.PLAIN_MESSAGE
             );
             if (comment == null) return;
-
             try {
                 salesmanManagement.recordSale(orderId, salesmanId, comment.trim());
                 JOptionPane.showMessageDialog(this, "Sale recorded successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);

@@ -1,10 +1,8 @@
 package ManagerPackage;
 
 import UserPackage.*;
-
 import java.util.*;
 import java.io.*;
-import java.util.stream.Collectors;
 
 public class ManagerManagement {
     private List<Manager> managers;
@@ -84,10 +82,6 @@ public class ManagerManagement {
         return false;
     }
 
-    public boolean updateManager(String unusedUsername, Manager updatedManager) {
-        return updateManager(updatedManager);
-    }
-
     public boolean deleteManager(String id) {
         Iterator<Manager> it = managers.iterator();
         while (it.hasNext()) {
@@ -100,55 +94,6 @@ public class ManagerManagement {
         }
         return false;
     }
-
-    // Profile Management
-    public boolean updateProfile(String username, String phoneNumber, String officeLocation) {
-        Manager manager = getManager(username);
-        if (manager == null) {
-            return false;
-        }
-        manager.setPhoneNumber(phoneNumber);
-        manager.setOfficeLocation(officeLocation);
-        logActivity(username, "PROFILE_UPDATE", "Profile information updated");
-        saveManagers();
-        return true;
-    }
-
-    // Salesman Management
-    public boolean assignSalesman(String managerUsername, String salesmanId) {
-        Manager manager = getManager(managerUsername);
-        if (manager == null) {
-            return false;
-        }
-        manager.addManagedSalesman(salesmanId);
-        logActivity(managerUsername, "ASSIGN_SALESMAN", "Assigned salesman: " + salesmanId);
-        saveManagers();
-        return true;
-    }
-
-    public boolean removeSalesman(String managerUsername, String salesmanId) {
-        Manager manager = getManager(managerUsername);
-        if (manager == null) {
-            return false;
-        }
-        manager.getManagedSalesmen().remove(salesmanId);
-        logActivity(managerUsername, "REMOVE_SALESMAN", "Removed salesman: " + salesmanId);
-        saveManagers();
-        return true;
-    }
-
-    // Approval Management
-    public boolean addApproval(String username, String approvalId) {
-        Manager manager = getManager(username);
-        if (manager == null) {
-            return false;
-        }
-        manager.addApproval(approvalId);
-        logActivity(username, "APPROVAL_ADDED", "New approval added: " + approvalId);
-        saveManagers();
-        return true;
-    }
-
     // File Operations
     private void loadManagers() {
         File f = new File(MANAGERS_FILE);
@@ -184,77 +129,6 @@ public class ManagerManagement {
             writer.newLine();
         } catch (IOException e) {
             System.out.println("Error logging activity: " + e.getMessage());
-        }
-    }
-
-    // Search Operations
-    public List<Manager> searchByDepartment(String department) {
-        List<Manager> result = new ArrayList<>();
-        for (Manager m : managers) {
-            if (m.getDepartment().equals(department)) {
-                result.add(m);
-            }
-        }
-        return result;
-    }
-
-    public List<Manager> searchByPosition(String position) {
-        List<Manager> result = new ArrayList<>();
-        for (Manager m : managers) {
-            if (m.getPosition().equals(position)) {
-                result.add(m);
-            }
-        }
-        return result;
-    }
-
-    public List<Manager> searchByAccessLevel(String accessLevel) {
-        List<Manager> result = new ArrayList<>();
-        for (Manager m : managers) {
-            if (m.getAccessLevel().equals(accessLevel)) {
-                result.add(m);
-            }
-        }
-        return result;
-    }
-
-    // Activity History
-    public List<UserActivity> getActivityHistory(String username) {
-        List<UserActivity> result = new ArrayList<>();
-        for (UserActivity a : activityLog) {
-            if (a.getUsername().equals(username)) {
-                result.add(a);
-            }
-        }
-        return result;
-    }
-
-    // Import/Export
-    public boolean importManagers(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                Manager manager = Manager.fromCSV(line);
-                managers.add(manager);
-            }
-            saveManagers();
-            return true;
-        } catch (IOException e) {
-            System.out.println("Error importing managers: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean exportManagers(String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            for (Manager manager : managers) {
-                writer.write(manager.toCSV());
-                writer.newLine();
-            }
-            return true;
-        } catch (IOException e) {
-            System.out.println("Error exporting managers: " + e.getMessage());
-            return false;
         }
     }
 }

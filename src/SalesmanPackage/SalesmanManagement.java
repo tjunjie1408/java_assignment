@@ -16,8 +16,8 @@ public class SalesmanManagement {
     private static final String SALESMEN_FILE = "salesmen.txt";
     private static final String ACTIVITY_LOG = "salesman_activity.log";
     private static final String SALES_RECORDS_FILE = "sales_records.txt";
-    private CustomerManagement customerManagement; // Dependency to access orders
-    private CarManagement carManagement; // Assumed dependency
+    private CustomerManagement customerManagement;
+    private CarManagement carManagement;
     private String email;
 
     public SalesmanManagement() {
@@ -100,19 +100,6 @@ public class SalesmanManagement {
         }
         return false;
     }
-
-    public boolean updateProfile(String username, String phoneNumber, String address) {
-        Salesman salesman = getSalesman(username);
-        if (salesman == null) {
-            return false;
-        }
-        salesman.setPhoneNumber(phoneNumber);
-        salesman.setEmail(email);
-        logActivity(username, "PROFILE_UPDATE", "Profile information updated");
-        saveSalesmen();
-        return true;
-    }
-
     public boolean addSale(String username, String saleId) {
         Salesman salesman = getSalesman(username);
         if (salesman == null) {
@@ -233,36 +220,6 @@ public class SalesmanManagement {
         } catch (IOException e) {
             System.out.println("Error logging activity: " + e.getMessage());
         }
-    }
-
-    public List<Salesman> searchByManager(String managerId) {
-        List<Salesman> result = new ArrayList<>();
-        for (Salesman s : salesmen) {
-            if (s.getManagerId().equals(managerId)) {
-                result.add(s);
-            }
-        }
-        return result;
-    }
-
-    public List<Salesman> searchBySalesRange(int minSales, int maxSales) {
-        List<Salesman> result = new ArrayList<>();
-        for (Salesman s : salesmen) {
-            if (s.getTotalSales() >= minSales && s.getTotalSales() <= maxSales) {
-                result.add(s);
-            }
-        }
-        return result;
-    }
-
-    public List<UserActivity> getActivityHistory(String username) {
-        List<UserActivity> result = new ArrayList<>();
-        for (UserActivity a : activityLog) {
-            if (a.getUsername().equals(username)) {
-                result.add(a);
-            }
-        }
-        return result;
     }
 
     private void loadSalesRecords() {

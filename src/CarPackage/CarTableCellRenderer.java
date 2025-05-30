@@ -3,15 +3,11 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.net.URL;
-
 public class CarTableCellRenderer extends JLabel implements TableCellRenderer {
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         setText("");
         setIcon(null);
-
         if (column == 5) {
             String photoPath = value.toString();
             URL imgUrl = getClass().getClassLoader().getResource(photoPath);
@@ -31,17 +27,13 @@ public class CarTableCellRenderer extends JLabel implements TableCellRenderer {
                     setIcon(new ImageIcon(scaled));
                 }
             }
-        } else {
-            setText(value.toString());
-        }
-
+        } else {setText(value.toString());}
         if (isSelected) {
             setBackground(table.getSelectionBackground());
             setForeground(table.getSelectionForeground());
         } else {
             setBackground(table.getBackground());
-            setForeground(table.getForeground());
-        }
+            setForeground(table.getForeground());}
         setOpaque(true);
         return this;
     }

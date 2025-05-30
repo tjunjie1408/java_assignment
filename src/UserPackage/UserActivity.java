@@ -16,13 +16,8 @@ public class UserActivity {
     }
 
     public String getUsername() {return username;}
-
     public String getAction() {return action;}
-
-    public LocalDateTime getTimestamp() {return timestamp;}
-
     public String getDetails() {return details;}
-
     public String toString() {
         return String.format("%s,%s,%s,%s",
                 timestamp, username, action, details);

@@ -1,11 +1,9 @@
 package SalesmanPackage;
 
-import CarPackage.CarManagement;
-import CustomerPackage.CustomerManagement;
+
 import MainPackage.AppContext;
 import MainPackage.IdShortenerRenderer;
 import MainPackage.LoginPage;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -95,7 +93,7 @@ public class SalesmanMain extends JFrame{
                 return;
             }
 
-            String field = action.replace("Edit ", "");  // yields "Username", "Password", etc.
+            String field = action.replace("Edit ", "");
             String newValue = JOptionPane.showInputDialog(
                     this,
                     "Enter new " + field + ":",

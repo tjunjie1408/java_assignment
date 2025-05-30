@@ -7,6 +7,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import CarPackage.*;
 import MainPackage.AppContext;
 
@@ -260,7 +261,7 @@ public class ManagerManageCars extends JFrame {
     }
 
     public class UpdateCarDialog extends JDialog {
-        private Car car;
+        private final Car car;
         private JComboBox<String> fieldCombo;
         private JTextField valueField;
         private JButton selectPhotoButton, updateButton, cancelButton;
@@ -299,7 +300,7 @@ public class ManagerManageCars extends JFrame {
                     valueField.setText(car.getPhotoPath());
                 } else {
                     selectPhotoButton.setVisible(false);
-                    switch (sel) {
+                    switch (Objects.requireNonNull(sel)) {
                         case "Brand":  valueField.setText(car.getBrand()); break;
                         case "Model":  valueField.setText(car.getModel()); break;
                         case "Color":  valueField.setText(car.getColor()); break;
@@ -360,7 +361,7 @@ public class ManagerManageCars extends JFrame {
                 return;
             }
             try {
-                switch (field) {
+                switch (Objects.requireNonNull(field)) {
                     case "Brand":      car.setBrand(newValue);  break;
                     case "Model":      car.setModel(newValue);  break;
                     case "Color":      car.setColor(newValue);  break;

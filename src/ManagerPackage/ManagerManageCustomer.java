@@ -1,13 +1,9 @@
 package ManagerPackage;
 
-import CustomerPackage.Customer;
-import CustomerPackage.CustomerManagement;
 import MainPackage.AppContext;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -22,12 +18,9 @@ public class ManagerManageCustomer extends JFrame {
     private JButton updateButton;
     private JButton deleteButton;
     private JButton exitButton;
-    private JLabel CustomerProfileManagement;
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> rowSorter;
     private static final String DATA_FILE = "customers.txt";
-    private CustomerManagement customerManagement;
-    private List<Customer> customers;
     private AppContext context;
 
     public ManagerManageCustomer(AppContext context) {

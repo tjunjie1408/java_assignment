@@ -1,7 +1,6 @@
 package CustomerPackage;
 
 import javax.swing.*;
-
 import CarPackage.CarManagement;
 import MainPackage.AppContext;
 import MainPackage.LoginPage;

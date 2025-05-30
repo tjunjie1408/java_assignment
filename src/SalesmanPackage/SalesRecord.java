@@ -28,18 +28,11 @@ public class SalesRecord {
         return String.join(",", recordId, orderId, salesmanId, safeComment);
     }
     // Getters
-    public String getRecordId() {
-        return recordId;
-    }
-    public String getOrderId() {
-        return orderId;
-    }
-    public String getSalesmanId() {
-        return salesmanId;
-    }
-    public String getComment() {
-        return comment;
-    }
+    public String getRecordId() {return recordId;}
+    public String getOrderId() {return orderId;}
+    public String getSalesmanId() {return salesmanId;}
+    public String getComment() {return comment;}
+
     @Override
     public String toString() {
         return "SalesRecord{" +

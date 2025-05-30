@@ -1,7 +1,7 @@
 package SalesmanPackage;
+
 import MainPackage.AppContext;
 import MainPackage.LoginPage;
-
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.FileReader;

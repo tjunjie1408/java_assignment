@@ -1,7 +1,6 @@
 package ManagerPackage;
 
 import MainPackage.AppContext;
-
 import javax.swing.*;
 
 public class SuperAdminPage extends JFrame{
@@ -37,12 +36,10 @@ public class SuperAdminPage extends JFrame{
             String password = new String(PasswordField.getPassword()).trim();
             String email = EmailTextField.getText().trim();
             String phoneNumber = PhoneNumberTextField.getText().trim();
-
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "All fields are required", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             Manager newManager = new Manager(username, password, email, phoneNumber);
             ManagerManagement mm = context.getManagerManagement();
             boolean added = mm.addManager(newManager);
@@ -50,14 +47,12 @@ public class SuperAdminPage extends JFrame{
                 JOptionPane.showMessageDialog(this,
                         "Username already exists",
                         "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+                return;}
             String newId = newManager.getId();
             context.setCurrentManagerId(newId);
             JOptionPane.showMessageDialog(this,
                     "Manager added successfully! " + username,
                     "Success", JOptionPane.INFORMATION_MESSAGE);
-
             UsernameTextField.setText("");
             PasswordField.setText("");
             EmailTextField.setText("");

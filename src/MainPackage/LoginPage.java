@@ -3,7 +3,6 @@ package MainPackage;
 import CustomerPackage.CustomerMain;
 import ManagerPackage.ManagerLogin;
 import SalesmanPackage.SalesmanLogin;
-import UserPackage.*;
 
 import javax.swing.*;
 
@@ -15,8 +14,6 @@ public class LoginPage extends JFrame{
     private JLabel LoginTitle;
     private JButton Exit;
     private AppContext context;
-    private String salesId;
-    private String customerId;
 
     public LoginPage(AppContext context) {
         this.context = context;
