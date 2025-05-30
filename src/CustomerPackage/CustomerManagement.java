@@ -107,12 +107,22 @@ public class CustomerManagement {
         if (order == null || !"CONFIRMED".equalsIgnoreCase(order.getStatus())) {
             throw new IllegalStateException("Order not ready for payment");
         }
+
         String paymentId = UUID.randomUUID().toString();
         Payment payment = new Payment(paymentId, orderId, amount, new Date());
         appendToFile(PAYMENTS_FILE, payment.toCSV());
+
         order.setStatus("PAID");
         saveOrders();
-        log("PAYMENT", orderId + ", payment=" + paymentId);
+        order.setStatus("COMPLETED");
+        saveOrders();
+        Car car = carManagement.getCar(order.getCarId());
+        if (car != null) {
+            car.setStatus("SOLD");
+            carManagement.updateCar(car.getCarId(), car);
+        }
+
+        log("PAYMENT_AND_COMPLETE", orderId + ", payment=" + paymentId);
         return payment;
     }
 

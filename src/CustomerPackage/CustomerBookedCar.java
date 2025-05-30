@@ -99,12 +99,12 @@ public class CustomerBookedCar extends JFrame {
                     .getCarManagement()
                     .getCar(order.getCarId())
                     .getPrice();
+
             try {
                 Payment payment = customerManagement.makePayment(selectedOrderId, amount);
                 JOptionPane.showMessageDialog(
                         this,
-                        "Payment successful! Payment ID: " + payment.getPaymentId() +
-                                "\nThank you for your payment!",
+                        "Payment successful and sale completed!\nPayment ID: " + payment.getPaymentId(),
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE
                 );

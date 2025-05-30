@@ -170,8 +170,8 @@ public class SalesmanManagement {
     // Record a sale
     public void recordSale(String orderId, String salesmanId, String comment) {
         Order order = customerManagement.findOrder(orderId);
-        if (order == null || !"PAID".equals(order.getStatus())) {
-            throw new IllegalStateException("Cannot record sale for unpaid order");
+        if (order == null || !"COMPLETED".equalsIgnoreCase(order.getStatus())) {
+            throw new IllegalStateException("Cannot record sale: order not COMPLETED");
         }
         String recordId = UUID.randomUUID().toString();
         SalesRecord record = new SalesRecord(recordId, orderId, salesmanId, comment);
@@ -180,6 +180,7 @@ public class SalesmanManagement {
         addSale(getSalesmanById(salesmanId).getUsername(), recordId);
         logActivity(salesmanId, "RECORD_SALE", "Sale recorded for order: " + orderId);
     }
+
 
     private void loadSalesmen() {
         File file = new File(SALESMEN_FILE);
